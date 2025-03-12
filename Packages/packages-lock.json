@@ -1,5 +1,25 @@
 {
   "dependencies": {
+    "com.annulusgames.lit-motion": {
+      "version": "https://github.com/annulusgames/LitMotion.git?path=src/LitMotion/Assets/LitMotion",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.burst": "1.6.0",
+        "com.unity.collections": "1.5.1",
+        "com.unity.mathematics": "1.0.1"
+      },
+      "hash": "b946c3a10848a426a09baa395df5151792d7625e"
+    },
+    "com.annulusgames.lit-motion.animation": {
+      "version": "https://github.com/annulusgames/LitMotion.git?path=src/LitMotion/Assets/LitMotion.Animation",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.annulusgames.lit-motion": "2.0.0"
+      },
+      "hash": "b946c3a10848a426a09baa395df5151792d7625e"
+    },
     "com.browar.editor-toolbox": {
       "version": "https://github.com/arimger/Unity-Editor-Toolbox.git#upm",
       "depth": 0,
@@ -171,7 +191,7 @@
     },
     "com.unity.mathematics": {
       "version": "1.3.2",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
