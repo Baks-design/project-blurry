@@ -1,14 +1,14 @@
-using AudioSystem;
+using Assets.Scripts.Runtime.Systems.Audio;
 using KBCore.Refs;
 using UnityEngine;
 
 namespace Assets.Scripts.Runtime.Entities.Player
 {
-    public class FootstepSystem : MonoBehaviour
+    public class PlayerSoundController : MonoBehaviour
     {
-        [SerializeField, Parent] AdvancedGridMovement advancedGridMovement;
+        [SerializeField, Parent] PlayerMovementController movementController;
         [SerializeField, Anywhere] Transform rightFoot, leftFoot;
-        [SerializeField] SoundData stepSoundData, blockSoundData;
+        [SerializeField, Anywhere] SoundData stepSoundData, blockSoundData;
         bool _nextStepLeft;
         SoundBuilder soundBuilder;
 
@@ -16,16 +16,16 @@ namespace Assets.Scripts.Runtime.Entities.Player
 
         void OnEnable()
         {
-            advancedGridMovement.BlockedEvent += Block;
-            advancedGridMovement.StepEvent += Step;
-            advancedGridMovement.TurnEvent += Turn;
+            movementController.BlockedEvent += Block;
+            movementController.StepEvent += Step;
+            movementController.TurnEvent += Turn;
         }
 
         void OnDisable()
         {
-            advancedGridMovement.BlockedEvent -= Block;
-            advancedGridMovement.StepEvent -= Step;
-            advancedGridMovement.TurnEvent -= Turn;
+            movementController.BlockedEvent -= Block;
+            movementController.StepEvent -= Step;
+            movementController.TurnEvent -= Turn;
         }
 
         void Step()

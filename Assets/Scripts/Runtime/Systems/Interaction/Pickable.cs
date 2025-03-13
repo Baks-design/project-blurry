@@ -3,33 +3,61 @@ using UnityEngine;
 
 namespace Assets.Scripts.Runtime.Systems.Interaction
 {
-    [RequireComponent(typeof(Rigidbody))]
     public class Pickable : MonoBehaviour, IPickable
     {
-        [SerializeField, Self] Rigidbody rigid;
+        [SerializeField, Self] Transform tr;
+        [SerializeField, Self] Collider coll;
+        [SerializeField, Range(1f, 10f)] float distanceFromCamera = 3f;
+        [SerializeField, Range(1f, 10f)] float positionSpeed = 2f;
+        [SerializeField, Range(1f, 10f)] float rotationSpeed = 2f;
+        private Vector3 initPos;
 
-        public Rigidbody Rigid { get; set; }
+
         public bool IsPicked { get; set; }
-        public bool IsHolded { get; set; }
-        public bool IsReleased { get; set; }
 
-        public void OnPickUp()
+        public void Start()
         {
-            IsPicked = true;
-            Debug.Log($"PickUp: {this}");
+            initPos = tr.localPosition;
         }
 
-        public void OnManipulate()
+        public void OnPickUp(Vector3 position, Quaternion rotation)
+        {
+            Debug.Log($"PickUp: {this}");
+
+            IsPicked = true;
+
+            var finalPos = new Vector3(position.x, position.y, position.z + distanceFromCamera);
+            tr.SetLocalPositionAndRotation(Vector3.Lerp(tr.localPosition, finalPos, positionSpeed * Time.deltaTime), rotation);
+        }
+
+        public void OnManipulate(Vector2 input)
         {
             Debug.Log($"Manipulating: {this}");
-            //rotate
+
+            var targetEulerAngles = new Vector2(input.x, input.y);
+            var targetRotation = Quaternion.Euler(targetEulerAngles);
+            tr.localRotation = Quaternion.Slerp(transform.localRotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
-        public void OnRelease()
+        public async void OnAddInventory(Vector3 playePos)
         {
-            IsPicked = false;
             Debug.Log($"Dropped: {this}");
-            //drop
+
+            IsPicked = false;
+
+            coll.enabled = false;
+            tr.localPosition = Vector3.Lerp(tr.localPosition, playePos, positionSpeed * Time.deltaTime);
+            await WaitForDestroy();
+        }
+
+        async Awaitable WaitForDestroy()
+        {
+            while (initPos == tr.localPosition)
+            {
+                await Awaitable.NextFrameAsync();
+            }
+
+            Destroy(this);
         }
     }
 }

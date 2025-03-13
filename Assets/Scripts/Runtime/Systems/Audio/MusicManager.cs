@@ -1,44 +1,49 @@
 using System.Collections.Generic;
+using Assets.Scripts.Runtime.Utilities.Extensions;
+using Assets.Scripts.Runtime.Utilities.Patterns.Singleton;
+using KBCore.Refs;
 using UnityEngine;
 using UnityEngine.Audio;
 
-namespace AudioSystem {
+namespace Assets.Scripts.Runtime.Systems.Audio
+{
     [RequireComponent(typeof(MusicManager))]
-    public class MusicManager : PersistentSingleton<MonoBehaviour> {
-        const float crossFadeTime = 1.0f;
+    public class MusicManager : PersistentSingleton<MonoBehaviour>
+    {
+        [SerializeField] List<AudioClip> initialPlaylist;
+        [SerializeField, Anywhere] AudioMixerGroup musicMixerGroup;
         float fading;
-        AudioSource current;
-        AudioSource previous;
+        const float crossFadeTime = 1f;
+        AudioSource current, previous;
         readonly Queue<AudioClip> playlist = new();
 
-        [SerializeField] List<AudioClip> initialPlaylist;
-        [SerializeField] AudioMixerGroup musicMixerGroup;
-
-        void Start() {
-            foreach (var clip in initialPlaylist) {
+        void Start()
+        {
+            foreach (var clip in initialPlaylist)
                 AddToPlaylist(clip);
-            }
         }
 
-        public void AddToPlaylist(AudioClip clip) {
+        public void AddToPlaylist(AudioClip clip)
+        {
             playlist.Enqueue(clip);
-            if (current == null && previous == null) {
+            if (current == null && previous == null)
                 PlayNextTrack();
-            }
         }
 
         public void Clear() => playlist.Clear();
 
-        public void PlayNextTrack() {
-            if (playlist.TryDequeue(out AudioClip nextTrack)) {
+        public void PlayNextTrack()
+        {
+            if (playlist.TryDequeue(out AudioClip nextTrack))
                 Play(nextTrack);
-            }
         }
 
-        public void Play(AudioClip clip) {
+        public void Play(AudioClip clip)
+        {
             if (current && current.clip == clip) return;
 
-            if (previous) {
+            if (previous)
+            {
                 Destroy(previous);
                 previous = null;
             }
@@ -49,37 +54,42 @@ namespace AudioSystem {
             current.clip = clip;
             current.outputAudioMixerGroup = musicMixerGroup; // Set mixer group
             current.loop = false; // For playlist functionality, we want tracks to play once
-            current.volume = 0;
+            current.volume = 0f;
             current.bypassListenerEffects = true;
             current.Play();
 
             fading = 0.001f;
         }
 
-        void Update() {
+        void Update()
+        {
             HandleCrossFade();
 
-            if (current && !current.isPlaying && playlist.Count > 0) {
+            if (current && !current.isPlaying && playlist.Count > 0)
                 PlayNextTrack();
-            }
         }
 
-        void HandleCrossFade() {
+        void HandleCrossFade()
+        {
             if (fading <= 0f) return;
-            
+
             fading += Time.deltaTime;
 
-            float fraction = Mathf.Clamp01(fading / crossFadeTime);
+            var fraction = Mathf.Clamp01(fading / crossFadeTime);
 
             // Logarithmic fade
-            float logFraction = fraction.ToLogarithmicFraction();
+            var logFraction = fraction.ToLogarithmicFraction();
 
-            if (previous) previous.volume = 1.0f - logFraction;
-            if (current) current.volume = logFraction;
+            if (previous)
+                previous.volume = 1f - logFraction;
+            if (current)
+                current.volume = logFraction;
 
-            if (fraction >= 1) {
-                fading = 0.0f;
-                if (previous) {
+            if (fraction >= 1f)
+            {
+                fading = 0f;
+                if (previous)
+                {
                     Destroy(previous);
                     previous = null;
                 }

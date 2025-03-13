@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Runtime.Entities.Player
 {
-    public class AdvancedGridMovement : MonoBehaviour
+    public class PlayerMovementController : MonoBehaviour
     {
         [SerializeField, Self] Transform _transform;
         [Header("Grid Settings")]
@@ -13,39 +13,12 @@ namespace Assets.Scripts.Runtime.Entities.Player
         [Header("Walk Settings")]
         [SerializeField, Range(1f, 5f)] float walkSpeed = 1f;
         [SerializeField, Range(1f, 10f)] float turnSpeed = 5f;
-        [SerializeField]
-        AnimationCurve walkSpeedCurve = new(
-            new Keyframe(0f, 0f),
-            new Keyframe(0.2f, 0.1f),
-            new Keyframe(0.5f, 0.7f),
-            new Keyframe(1f, 1f)
-        );
-        [SerializeField]
-        AnimationCurve walkHeadBobCurve = new(
-            new Keyframe(0f, 0f),
-            new Keyframe(0.25f, 1f),
-            new Keyframe(0.5f, 0f),
-            new Keyframe(0.75f, -1f),
-            new Keyframe(1f, 0f)
-        );
+        [SerializeField] AnimationCurve walkSpeedCurve;
+        [SerializeField] AnimationCurve walkHeadBobCurve;
         [Header("Run Settings")]
         [SerializeField, Range(1f, 5f)] float runningSpeed = 1.5f;
-        [SerializeField]
-        AnimationCurve runningSpeedCurve = new(
-            new Keyframe(0f, 0f),
-            new Keyframe(0.1f, 0.3f),
-            new Keyframe(0.5f, 0.8f),
-            new Keyframe(1f, 1f)
-        );
-        [SerializeField]
-        AnimationCurve runningHeadBobCurve = new(
-            new Keyframe(0f, 0f),
-            new Keyframe(0.2f, 1f),
-            new Keyframe(0.4f, 0f),
-            new Keyframe(0.6f, -1f),
-            new Keyframe(0.8f, 0f),
-            new Keyframe(1f, 1f)
-        );
+        [SerializeField] AnimationCurve runningSpeedCurve;
+        [SerializeField] AnimationCurve runningHeadBobCurve;
         [Header("Step Settings")]
         [SerializeField, Range(1f, 5f)] float maximumStepHeight = 2f;
         float _rotationTime, _curveTime, _stepTime, _stepTimeCounter, _currentSpeed;

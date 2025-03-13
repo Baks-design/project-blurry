@@ -1,7 +1,9 @@
 using UnityEngine;
 
-namespace AudioSystem {
-    public static class AudioExtensions {
+namespace Assets.Scripts.Runtime.Utilities.Extensions
+{
+    public static class AudioExtensions
+    {
         /// <summary>
         /// Converts a float value representing a volume slider position into a logarithmic volume,
         /// giving us a smoother and more natural-sounding progression when a volume slider is moved.
@@ -13,9 +15,7 @@ namespace AudioSystem {
         ///
         /// This method is useful for normalizing UI Volume Sliders used with Unity's Audio Mixer.
         /// </summary>
-        public static float ToLogarithmicVolume(this float sliderValue) {
-            return Mathf.Log10(Mathf.Max(sliderValue, 0.0001f)) * 20;
-        }
+        public static float ToLogarithmicVolume(this float sliderValue) => Mathf.Log10(Mathf.Max(sliderValue, 0.0001f)) * 20;
 
         /// <summary>
         /// Given a fraction in the range of [0, 1], convert it to a logarithmic scale (also in range [0, 1])
@@ -28,9 +28,7 @@ namespace AudioSystem {
         ///   since as we know the input to Log10 function can vary between 1 and 10 after the interpolation.
         ///
         /// This method is useful for improved fading effects between Audio Clips.
-        /// </summary>
-        public static float ToLogarithmicFraction(this float fraction) {
-            return Mathf.Log10(1 + 9 * fraction) / Mathf.Log10(10);
-        }
+        /// /// </summary>
+        public static float ToLogarithmicFraction(this float fraction) => Mathf.Log10(1 + 9 * fraction) / Mathf.Log10(10);
     }
 }

@@ -10,15 +10,15 @@ namespace Assets.Scripts.Runtime.Entities.Player
     {
         public InputSystem_Actions inputActions;
 
-        public event UnityAction<bool> MoveForward = delegate { };
+        public event UnityAction MoveForward = delegate { };
         public event UnityAction<bool> MoveRunForward = delegate { };
-        public event UnityAction<bool> MoveBackward = delegate { };
-        public event UnityAction<bool> MoveStrafeRight = delegate { };
-        public event UnityAction<bool> MoveStrafeLeft = delegate { };
-        public event UnityAction<bool> MoveTurnRight = delegate { };
-        public event UnityAction<bool> MoveTurnLeft = delegate { };
+        public event UnityAction MoveBackward = delegate { };
+        public event UnityAction MoveStrafeRight = delegate { };
+        public event UnityAction MoveStrafeLeft = delegate { };
+        public event UnityAction MoveTurnRight = delegate { };
+        public event UnityAction MoveTurnLeft = delegate { };
         public event UnityAction<bool> HoldLook = delegate { };
-        public event UnityAction<Vector2> Look = delegate { };
+        public event UnityAction<Vector2, bool> Look = delegate { };
         public event UnityAction Interaction = delegate { };
         public event UnityAction Crouch = delegate { };
         public event UnityAction OpenMenu = delegate { };
@@ -35,26 +35,18 @@ namespace Assets.Scripts.Runtime.Entities.Player
         }
 
         #region Event Handlers
-        public void OnLook(InputAction.CallbackContext context) => Look.Invoke(context.ReadValue<Vector2>());
+        public void OnLook(InputAction.CallbackContext context) => Look.Invoke(context.ReadValue<Vector2>(), IsDeviceMouse(context));
+
+        bool IsDeviceMouse(InputAction.CallbackContext context) => context.control.device.name == "Mouse";
 
         public void OnForward(InputAction.CallbackContext context)
         {
             switch (context.phase)
             {
                 case InputActionPhase.Started:
-                    MoveForward.Invoke(true);
+                    MoveForward.Invoke();
                     break;
-                case InputActionPhase.Canceled:
-                    MoveForward.Invoke(false);
-                    break;
-            }
-        }
-
-        public void OnRun(InputAction.CallbackContext context)
-        {
-            switch (context.phase)
-            {
-                case InputActionPhase.Started:
+                case InputActionPhase.Performed:
                     MoveRunForward.Invoke(true);
                     break;
                 case InputActionPhase.Canceled:
@@ -65,67 +57,32 @@ namespace Assets.Scripts.Runtime.Entities.Player
 
         public void OnBackward(InputAction.CallbackContext context)
         {
-            switch (context.phase)
-            {
-                case InputActionPhase.Started:
-                    MoveBackward.Invoke(true);
-                    break;
-                case InputActionPhase.Canceled:
-                    MoveBackward.Invoke(false);
-                    break;
-            }
+            if (context.phase is InputActionPhase.Started)
+                MoveBackward.Invoke();
         }
 
         public void OnStrafeRight(InputAction.CallbackContext context)
         {
-            switch (context.phase)
-            {
-                case InputActionPhase.Started:
-                    MoveStrafeRight.Invoke(true);
-                    break;
-                case InputActionPhase.Canceled:
-                    MoveStrafeRight.Invoke(false);
-                    break;
-            }
+            if (context.phase is InputActionPhase.Started)
+                MoveStrafeRight.Invoke();
         }
 
         public void OnStrafeLeft(InputAction.CallbackContext context)
         {
-            switch (context.phase)
-            {
-                case InputActionPhase.Started:
-                    MoveStrafeLeft.Invoke(true);
-                    break;
-                case InputActionPhase.Canceled:
-                    MoveStrafeLeft.Invoke(false);
-                    break;
-            }
+            if (context.phase is InputActionPhase.Started)
+                MoveStrafeLeft.Invoke();
         }
 
         public void OnTurnRight(InputAction.CallbackContext context)
         {
-            switch (context.phase)
-            {
-                case InputActionPhase.Started:
-                    MoveTurnRight.Invoke(true);
-                    break;
-                case InputActionPhase.Canceled:
-                    MoveTurnRight.Invoke(false);
-                    break;
-            }
+            if (context.phase is InputActionPhase.Started)
+                MoveTurnRight.Invoke();
         }
 
         public void OnTurnLeft(InputAction.CallbackContext context)
         {
-            switch (context.phase)
-            {
-                case InputActionPhase.Started:
-                    MoveTurnLeft.Invoke(true);
-                    break;
-                case InputActionPhase.Canceled:
-                    MoveTurnLeft.Invoke(false);
-                    break;
-            }
+            if (context.phase is InputActionPhase.Started)
+                MoveTurnLeft.Invoke();
         }
 
         public void OnHoldLook(InputAction.CallbackContext context)

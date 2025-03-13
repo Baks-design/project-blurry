@@ -101,15 +101,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Run"",
-                    ""type"": ""Button"",
-                    ""id"": ""d6941295-3814-4991-a5b5-81c07a3981ae"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Backward"",
                     ""type"": ""Button"",
                     ""id"": ""78049ead-24bd-4130-8ca5-566237b7cd55"",
@@ -206,8 +197,19 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""id"": ""8c8e490b-c610-4785-884f-f04217b23ca4"",
                     ""path"": ""<Pointer>/delta"",
                     ""interactions"": """",
-                    ""processors"": """",
+                    ""processors"": ""InvertVector2(invertX=false),ScaleVector2(x=0.05,y=0.05)"",
                     ""groups"": "";Keyboard&Mouse;Touch"",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""781d3b3f-00f1-41f5-a5ee-315b42a7d53d"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": ""InvertVector2(invertX=false),StickDeadzone,ScaleVector2(x=300,y=300)"",
+                    ""groups"": """",
                     ""action"": ""Look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -319,17 +321,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""Interaction"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""5a5cbbf3-e367-41ca-bf30-ea42befa4e35"",
-                    ""path"": ""<Keyboard>/leftShift"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""Run"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -590,7 +581,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         // Gameplay
         m_Gameplay = asset.FindActionMap("Gameplay", throwIfNotFound: true);
         m_Gameplay_Forward = m_Gameplay.FindAction("Forward", throwIfNotFound: true);
-        m_Gameplay_Run = m_Gameplay.FindAction("Run", throwIfNotFound: true);
         m_Gameplay_Backward = m_Gameplay.FindAction("Backward", throwIfNotFound: true);
         m_Gameplay_StrafeRight = m_Gameplay.FindAction("StrafeRight", throwIfNotFound: true);
         m_Gameplay_StrafeLeft = m_Gameplay.FindAction("StrafeLeft", throwIfNotFound: true);
@@ -694,7 +684,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Gameplay;
     private List<IGameplayActions> m_GameplayActionsCallbackInterfaces = new List<IGameplayActions>();
     private readonly InputAction m_Gameplay_Forward;
-    private readonly InputAction m_Gameplay_Run;
     private readonly InputAction m_Gameplay_Backward;
     private readonly InputAction m_Gameplay_StrafeRight;
     private readonly InputAction m_Gameplay_StrafeLeft;
@@ -720,10 +709,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Gameplay/Forward".
         /// </summary>
         public InputAction @Forward => m_Wrapper.m_Gameplay_Forward;
-        /// <summary>
-        /// Provides access to the underlying input action "Gameplay/Run".
-        /// </summary>
-        public InputAction @Run => m_Wrapper.m_Gameplay_Run;
         /// <summary>
         /// Provides access to the underlying input action "Gameplay/Backward".
         /// </summary>
@@ -793,9 +778,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Forward.started += instance.OnForward;
             @Forward.performed += instance.OnForward;
             @Forward.canceled += instance.OnForward;
-            @Run.started += instance.OnRun;
-            @Run.performed += instance.OnRun;
-            @Run.canceled += instance.OnRun;
             @Backward.started += instance.OnBackward;
             @Backward.performed += instance.OnBackward;
             @Backward.canceled += instance.OnBackward;
@@ -840,9 +822,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Forward.started -= instance.OnForward;
             @Forward.performed -= instance.OnForward;
             @Forward.canceled -= instance.OnForward;
-            @Run.started -= instance.OnRun;
-            @Run.performed -= instance.OnRun;
-            @Run.canceled -= instance.OnRun;
             @Backward.started -= instance.OnBackward;
             @Backward.performed -= instance.OnBackward;
             @Backward.canceled -= instance.OnBackward;
@@ -1117,13 +1096,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnForward(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "Run" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnRun(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Backward" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>

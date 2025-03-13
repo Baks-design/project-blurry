@@ -5,12 +5,9 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
     public interface IPickable
     {
         bool IsPicked { get; set; }
-        bool IsHolded { get; set; }
-        bool IsReleased { get; set; }
-        Rigidbody Rigid { get; set; }
 
-        void OnPickUp();
-        void OnManipulate();
-        void OnRelease();
+        void OnPickUp(Vector3 position, Quaternion rotation);
+        void OnManipulate(Vector2 input);
+        void OnAddInventory(Vector3 playePos);
     }
 }

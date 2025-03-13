@@ -1,63 +1,74 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Runtime.Systems.EventBus;
+using Assets.Scripts.Runtime.Systems.EventBus.Events;
 using KBCore.Refs;
 using UnityEngine;
 
 namespace Assets.Scripts.Runtime.Entities.Player
 {
-    [RequireComponent(typeof(AdvancedGridMovement))]
+    [RequireComponent(typeof(PlayerMovementController))]
     public class MovementQueue : MonoBehaviour
     {
-        [SerializeField, Self] AdvancedGridMovement advancedGridMovement;
+        [SerializeField, Self] PlayerMovementController movementController;
         [SerializeField, Anywhere] InputReader inputReader;
         [SerializeField, Range(1, 5)] int QueueDepth = 1;
         [SerializeField, Range(0.5f, 5f)] float keyPressThresholdTime = 1f;
-        bool IsMoveForward, IsMoveRunForward, IsMoveBackward, IsMoveStrafeRight;
-        bool IsMoveStrafeLeft, IsMoveTurnRight, IsMoveTurnLeft;
+        bool isRunHold, isMoveValid = true;
         float forwardKeyPressedTime;
         Queue<Action> movementQueue;
 
         public event Action OnEventIfTheCommandIsNotQueable = delegate { };
+        EventBinding<PickItemEvent> pickItemEventBinding;
 
-        void Awake() => inputReader.EnablePlayerActions();
+        void Awake()
+        {
+            inputReader.SetCursorLockState(true);
+            inputReader.EnablePlayerActions();
+        }
 
         void OnEnable()
         {
-            advancedGridMovement.BlockedEvent += FlushQueue;
-            inputReader.MoveForward += PerformedForward;
-            inputReader.MoveRunForward += PerformedRunForward;
-            inputReader.MoveBackward += PerformedBackward;
-            inputReader.MoveStrafeRight += PerformedStrafeRight;
-            inputReader.MoveStrafeLeft += PerformedStrafeLeft;
-            inputReader.MoveTurnRight += PerformedTurnRight;
-            inputReader.MoveTurnLeft += PerformedTurnLeft;
+            movementController.BlockedEvent += FlushQueue;
+            inputReader.MoveForward += Forward;
+            inputReader.MoveRunForward += RunForward;
+            inputReader.MoveBackward += Backward;
+            inputReader.MoveStrafeRight += StrafeRight;
+            inputReader.MoveStrafeLeft += StrafeLeft;
+            inputReader.MoveTurnRight += TurnRight;
+            inputReader.MoveTurnLeft += TurnLeft;
+
+            pickItemEventBinding = new EventBinding<PickItemEvent>(HandlePickItemEvent);
+            EventBus<PickItemEvent>.Register(pickItemEventBinding);
         }
 
         void OnDisable()
         {
-            advancedGridMovement.BlockedEvent -= FlushQueue;
-            inputReader.MoveForward -= PerformedForward;
-            inputReader.MoveRunForward -= PerformedRunForward;
-            inputReader.MoveBackward -= PerformedBackward;
-            inputReader.MoveStrafeRight -= PerformedStrafeRight;
-            inputReader.MoveStrafeLeft -= PerformedStrafeLeft;
-            inputReader.MoveTurnRight -= PerformedTurnRight;
-            inputReader.MoveTurnLeft -= PerformedTurnLeft;
+            movementController.BlockedEvent -= FlushQueue;
+            inputReader.MoveForward -= Forward;
+            inputReader.MoveRunForward -= RunForward;
+            inputReader.MoveBackward -= Backward;
+            inputReader.MoveStrafeRight -= StrafeRight;
+            inputReader.MoveStrafeLeft -= StrafeLeft;
+            inputReader.MoveTurnRight -= TurnRight;
+            inputReader.MoveTurnLeft -= TurnLeft;
+
+            EventBus<PickItemEvent>.Deregister(pickItemEventBinding);
         }
 
-        void PerformedForward(bool value) => IsMoveForward = value;
-        void PerformedRunForward(bool value) => IsMoveRunForward = value;
-        void PerformedBackward(bool value) => IsMoveBackward = value;
-        void PerformedStrafeRight(bool value) => IsMoveStrafeRight = value;
-        void PerformedStrafeLeft(bool value) => IsMoveStrafeLeft = value;
-        void PerformedTurnRight(bool value) => IsMoveTurnRight = value;
-        void PerformedTurnLeft(bool value) => IsMoveTurnLeft = value;
+        void Forward() => QueueCommand(() => movementController.MoveForward());
+        void Backward() => QueueCommand(() => movementController.MoveBackward());
+        void StrafeRight() => QueueCommand(() => movementController.StrafeRight());
+        void StrafeLeft() => QueueCommand(() => movementController.StrafeLeft());
+        void TurnRight() => QueueCommand(() => movementController.TurnRight());
+        void TurnLeft() => QueueCommand(() => movementController.TurnLeft());
+        void RunForward(bool isRun) => isRunHold = isRun;
+        void HandlePickItemEvent(PickItemEvent pickItemEvent) => isMoveValid = pickItemEvent.isMoveValid;
 
         void Start()
         {
             InitQueue();
             ResetKeyPressTimer();
-            inputReader.SetCursorLockState(true);
         }
 
         void InitQueue() => movementQueue = new Queue<Action>(QueueDepth);
@@ -65,26 +76,24 @@ namespace Assets.Scripts.Runtime.Entities.Player
         void Update()
         {
             MovementHandle();
-            HandleQueueCommand();
+            RunMovementHandle();
         }
 
         void MovementHandle()
         {
-            if (!advancedGridMovement.IsStationary || movementQueue.Count <= 0) return;
+            if (!isMoveValid) return;
+            if (!movementController.IsStationary || movementQueue.Count <= 0) return;
             var action = movementQueue.Dequeue();
             action?.Invoke();
         }
 
-        void HandleQueueCommand()
+        void RunMovementHandle()
         {
-            if (IsMoveForward) QueueCommand(() => advancedGridMovement.MoveForward());
-            if (IsMoveForward && IsMoveRunForward) RunForward();
-            else if (IsMoveForward && !IsMoveRunForward) StopRunForward();
-            if (IsMoveBackward) QueueCommand(() => advancedGridMovement.MoveBackward());
-            if (IsMoveStrafeRight) QueueCommand(() => advancedGridMovement.StrafeRight());
-            if (IsMoveStrafeLeft) QueueCommand(() => advancedGridMovement.StrafeLeft());
-            if (IsMoveTurnRight) QueueCommand(() => advancedGridMovement.TurnRight());
-            if (IsMoveTurnLeft) QueueCommand(() => advancedGridMovement.TurnLeft());
+            if (!isMoveValid) return;
+            if (isRunHold)
+                RunForward();
+            else if (!isRunHold)
+                StopRunForward();
         }
 
         void RunForward()
@@ -92,8 +101,8 @@ namespace Assets.Scripts.Runtime.Entities.Player
             forwardKeyPressedTime += Time.deltaTime;
             if (forwardKeyPressedTime >= keyPressThresholdTime && movementQueue.Count < QueueDepth)
             {
-                advancedGridMovement.SwitchToRunning();
-                QueueCommand(() => advancedGridMovement.MoveForward());
+                movementController.SwitchToRunning();
+                QueueCommand(() => movementController.MoveForward());
             }
         }
 
@@ -117,7 +126,7 @@ namespace Assets.Scripts.Runtime.Entities.Player
         {
             ResetKeyPressTimer();
             movementQueue.Clear();
-            advancedGridMovement.SwitchToWalking();
+            movementController.SwitchToWalking();
         }
 
         void ResetKeyPressTimer() => forwardKeyPressedTime = 0f;

@@ -1,69 +1,96 @@
 ﻿using System;
 using Assets.Scripts.Runtime.Entities.Player;
+using Assets.Scripts.Runtime.Systems.EventBus;
+using Assets.Scripts.Runtime.Systems.EventBus.Events;
+using KBCore.Refs;
 using UnityEngine;
 
 namespace Assets.Scripts.Runtime.Systems.Interaction
 {
     public class InteractionController : MonoBehaviour
     {
-        [SerializeField] InputReader inputReader;
+        [SerializeField, Anywhere] Transform tr;
+        [SerializeField, Anywhere] VolumeController volumeController;
+        [SerializeField, Anywhere] InputReader inputReader;
         [SerializeField] LayerMask interactableLayer;
         [SerializeField, Range(0.5f, 5f)] float rayDistance = 2f;
         [SerializeField, Range(0.1f, 1f)] float raySphereRadius = 0.5f;
-        bool lastHitSomething;
+        bool lastHitSomething, isHoldingItem;
         Ray lastRay;
-        Transform hitTransform;
-        Transform cameraTransform;
-        IPickable pickable;
+        Vector2 look;
+        Transform hitTransform, cameraTransform;
         readonly RaycastHit[] hits = new RaycastHit[1];
+        IPickable pickable;
 
         void Start() => cameraTransform = Camera.main.transform;
 
         void OnEnable()
         {
-            inputReader.Interaction += PickUp;
-            inputReader.Interaction += AddToInventory;
+            inputReader.Look += LookInput;
+            inputReader.Interaction += HandleInteraction;
         }
 
         void OnDisable()
         {
-            inputReader.Interaction -= PickUp;
-            inputReader.Interaction -= AddToInventory;
+            inputReader.Look -= LookInput;
+            inputReader.Interaction -= HandleInteraction;
+        }
+
+        void LookInput(Vector2 value, bool isC) => look = value;
+
+        void HandleInteraction()
+        {
+            if (isHoldingItem)
+                AddInventory();
+            else
+                PickUp();
         }
 
         void PickUp()
         {
-            if (!pickable.IsPicked && hitTransform.TryGetComponent(out pickable))
-                pickable.OnPickUp();
+            if (hitTransform != null && hitTransform.TryGetComponent(out pickable) && !pickable.IsPicked)
+            {
+                isHoldingItem = true;
+                EventBus<PickItemEvent>.Raise(new PickItemEvent { isMoveValid = false });
+                volumeController.ToggleDepthOfField(true);
+            }
         }
 
-        void AddToInventory()
+        void AddInventory()
         {
-            if (pickable.IsPicked)
+            if (pickable != null && pickable.IsPicked)
             {
-                //TODO: add to inv
+                isHoldingItem = false;
+                EventBus<PickItemEvent>.Raise(new PickItemEvent { isMoveValid = true });
+                pickable = null;
+                volumeController.ToggleDepthOfField(false);
+                //TODO: Add to inventory;
             }
         }
 
         void Update()
         {
             CheckForInteractable();
-            ManipulateItem();
+            HandleObjects();
         }
 
         void CheckForInteractable()
         {
-            lastRay = new Ray(cameraTransform.position, cameraTransform.forward);
+            lastRay = new Ray(cameraTransform.localPosition, cameraTransform.forward);
             var hitCount = Physics.SphereCastNonAlloc(
                 lastRay, raySphereRadius, hits, rayDistance, interactableLayer, QueryTriggerInteraction.Ignore);
             lastHitSomething = hitCount > 0;
             hitTransform = lastHitSomething ? hits[0].transform : null;
         }
 
-        void ManipulateItem()
+        void HandleObjects() //FIXME: Handle
         {
-            if (pickable != null && pickable.IsPicked)
-                pickable.OnManipulate();
+            if (!isHoldingItem)
+                pickable.OnPickUp(hitTransform.localPosition, cameraTransform.localRotation);
+            else if (pickable != null && pickable.IsPicked)
+                pickable.OnManipulate(look);
+            else if (isHoldingItem)
+                pickable.OnAddInventory(tr.localPosition);
         }
 
         void OnDrawGizmos()
