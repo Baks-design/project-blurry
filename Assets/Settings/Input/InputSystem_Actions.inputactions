@@ -87,9 +87,18 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Interaction",
+                    "name": "PickUp",
                     "type": "Button",
                     "id": "de9840c4-32d5-4975-91cb-d15d1bf5f725",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Drop",
+                    "type": "Button",
+                    "id": "0e3e69a5-9eb8-4031-844e-14e2b4a9cca3",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -234,7 +243,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Interaction",
+                    "action": "PickUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7feea282-1d71-4ea8-8bdd-0a9bb68af70d",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Drop",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

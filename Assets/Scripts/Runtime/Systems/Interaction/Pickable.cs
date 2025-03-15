@@ -10,54 +10,43 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
         [SerializeField, Range(1f, 10f)] float distanceFromCamera = 3f;
         [SerializeField, Range(1f, 10f)] float positionSpeed = 2f;
         [SerializeField, Range(1f, 10f)] float rotationSpeed = 2f;
-        private Vector3 initPos;
-
 
         public bool IsPicked { get; set; }
 
-        public void Start()
-        {
-            initPos = tr.localPosition;
-        }
-
-        public void OnPickUp(Vector3 position, Quaternion rotation)
+        public void OnPickUp(Vector3 position, Quaternion rotation, Vector2 input)
         {
             Debug.Log($"PickUp: {this}");
 
             IsPicked = true;
 
-            var finalPos = new Vector3(position.x, position.y, position.z + distanceFromCamera);
-            tr.SetLocalPositionAndRotation(Vector3.Lerp(tr.localPosition, finalPos, positionSpeed * Time.deltaTime), rotation);
-        }
+            var finalPos = position + Camera.main.transform.forward * distanceFromCamera;
+            tr.SetPositionAndRotation(Vector3.Lerp(tr.position, finalPos, positionSpeed * Time.deltaTime), rotation);
 
-        public void OnManipulate(Vector2 input)
-        {
-            Debug.Log($"Manipulating: {this}");
-
-            var targetEulerAngles = new Vector2(input.x, input.y);
+            var targetEulerAngles = new Vector3(-input.y, input.x, 0f);
             var targetRotation = Quaternion.Euler(targetEulerAngles);
-            tr.localRotation = Quaternion.Slerp(transform.localRotation, targetRotation, rotationSpeed * Time.deltaTime);
+            tr.localRotation = Quaternion.Slerp(tr.localRotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
-        public async void OnAddInventory(Vector3 playePos)
+        public async void OnSave(Vector3 playerPos)
         {
             Debug.Log($"Dropped: {this}");
 
             IsPicked = false;
 
             coll.enabled = false;
-            tr.localPosition = Vector3.Lerp(tr.localPosition, playePos, positionSpeed * Time.deltaTime);
-            await WaitForDestroy();
-        }
 
-        async Awaitable WaitForDestroy()
-        {
-            while (initPos == tr.localPosition)
+            while (Vector3.Distance(tr.position, playerPos) > 0.1f)
             {
+                tr.position = Vector3.Lerp(tr.position, playerPos, positionSpeed * Time.deltaTime);
                 await Awaitable.NextFrameAsync();
             }
 
-            Destroy(this);
+            Destroy(gameObject);
+        }
+
+        public void OnDrop(Vector3 position)
+        {
+            //
         }
     }
 }

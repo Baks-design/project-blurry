@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.Events;
 using static InputSystem_Actions;
 
-namespace Assets.Scripts.Runtime.Entities.Player
+namespace Assets.Scripts.Runtime.Utilities.Helpers
 {
     [CreateAssetMenu(menuName = "Data/Systems/InputReader")]
     public class InputReader : ScriptableObject, IGameplayActions
@@ -19,7 +19,8 @@ namespace Assets.Scripts.Runtime.Entities.Player
         public event UnityAction MoveTurnLeft = delegate { };
         public event UnityAction<bool> HoldLook = delegate { };
         public event UnityAction<Vector2, bool> Look = delegate { };
-        public event UnityAction Interaction = delegate { };
+        public event UnityAction<bool> Pickup = delegate { };
+        public event UnityAction<bool> Drop = delegate { };
         public event UnityAction Crouch = delegate { };
         public event UnityAction OpenMenu = delegate { };
         public event UnityAction CloseMenu = delegate { };
@@ -104,10 +105,30 @@ namespace Assets.Scripts.Runtime.Entities.Player
                 Crouch.Invoke();
         }
 
-        public void OnInteraction(InputAction.CallbackContext context)
+        public void OnPickUp(InputAction.CallbackContext context)
         {
-            if (context.phase is InputActionPhase.Started)
-                Interaction.Invoke();
+            switch (context.phase)
+            {
+                case InputActionPhase.Started:
+                    Pickup.Invoke(true);
+                    break;
+                case InputActionPhase.Canceled:
+                    Pickup.Invoke(false);
+                    break;
+            }
+        }
+
+        public void OnDrop(InputAction.CallbackContext context)
+        {
+            switch (context.phase)
+            {
+                case InputActionPhase.Started:
+                    Drop.Invoke(true);
+                    break;
+                case InputActionPhase.Canceled:
+                    Drop.Invoke(false);
+                    break;
+            }
         }
 
         public void OnOpenMenu(InputAction.CallbackContext context)

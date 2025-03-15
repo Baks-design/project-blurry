@@ -19,7 +19,7 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
             set => tooltip = value;
         }
 
-        void Start() => myMat = meshRenderer.material;
+        void Start() => myMat = meshRenderer.sharedMaterial;
 
         public void OnHoverStart(Material hoverMat) => meshRenderer.material = hoverMat;
 

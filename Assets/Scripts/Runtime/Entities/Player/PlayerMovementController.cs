@@ -1,10 +1,12 @@
 ﻿using System;
+using Assets.Scripts.Runtime.Systems.Interaction;
+using Assets.Scripts.Runtime.Utilities.Patterns.StateMachine;
 using KBCore.Refs;
 using UnityEngine;
 
 namespace Assets.Scripts.Runtime.Entities.Player
 {
-    public class PlayerMovementController : MonoBehaviour
+    public class PlayerMovementController : StatefulEntity  //FIXME
     {
         [SerializeField, Self] Transform _transform;
         [Header("Grid Settings")]
@@ -38,7 +40,26 @@ namespace Assets.Scripts.Runtime.Entities.Player
         public event Action StepEvent = delegate { };
         public event Action TurnEvent = delegate { };
 
-        void Start()
+        #region Setup
+        protected override void Awake()
+        {
+            base.Awake();
+            SetupStateMachine();
+            GetVars();
+        }
+
+        void SetupStateMachine()
+        {
+            var idle = new IdleState(this);
+            var moving = new MovingState(this);
+
+            At(idle, moving, !IsStationary);
+            At(moving, idle, IsStationary);
+
+            stateMachine.SetState(idle);
+        }
+
+        void GetVars()
         {
             _moveTowardsPosition = _transform.position;
             _rotateTowardsDirection = _transform.rotation;
@@ -47,12 +68,9 @@ namespace Assets.Scripts.Runtime.Entities.Player
             _currentSpeed = walkSpeed;
             _stepTime = 1f / gridSize;
         }
-
-        void Update()
-        {
-            AnimateMovement();
-            AnimateRotation();
-        }
+      
+        protected override void Update() => base.Update();
+        #endregion
 
         public void SwitchToWalking() => UpdateMovementSettings(walkSpeedCurve, walkHeadBobCurve, walkSpeed);
 
@@ -79,7 +97,7 @@ namespace Assets.Scripts.Runtime.Entities.Player
             return result;
         }
 
-        void AnimateRotation()
+        public void AnimateRotation()
         {
             if (!IsRotating) return;
 
@@ -88,7 +106,7 @@ namespace Assets.Scripts.Runtime.Entities.Player
             CompensateRoundingErrors();
         }
 
-        void AnimateMovement()
+        public void AnimateMovement()
         {
             if (!IsMoving) return;
 
