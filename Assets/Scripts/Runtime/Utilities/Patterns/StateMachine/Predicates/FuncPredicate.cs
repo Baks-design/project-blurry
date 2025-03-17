@@ -1,6 +1,6 @@
 using System;
 
-namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine
+namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine.Predicates
 {
     public class FuncPredicate : IPredicate
     {

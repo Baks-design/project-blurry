@@ -1,6 +1,6 @@
 using Assets.Scripts.Runtime.Utilities.Patterns.StateMachine;
 
-namespace Assets.Scripts.Runtime.Entities.Player
+namespace Assets.Scripts.Runtime.Entities.Player.States
 {
     public class MovingState : IState
     {

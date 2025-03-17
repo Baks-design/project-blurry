@@ -182,9 +182,9 @@ MonoBehaviour:
   movementController: {fileID: 694196760531210215}
   rightFoot: {fileID: 8819301812310992212}
   leftFoot: {fileID: 3574428554863242902}
-  stepSoundData:
-    clip: {fileID: 8300000, guid: 03abc06de1e112f4cbd8856cc395339a, type: 3}
-    mixerGroup: {fileID: 4796280562796518393, guid: 0648aff6a08d3f0468df28399773aba6, type: 2}
+  defaultStepSoundData:
+    clip: {fileID: 0}
+    mixerGroup: {fileID: 0}
     loop: 0
     playOnAwake: 0
     frequentSound: 0
@@ -205,29 +205,32 @@ MonoBehaviour:
     ignoreListenerVolume: 0
     ignoreListenerPause: 0
     rolloffMode: 0
-  blockSoundData:
-    clip: {fileID: 8300000, guid: 21c8de1c49061ae45b7c3c8a10630351, type: 3}
-    mixerGroup: {fileID: 4796280562796518393, guid: 0648aff6a08d3f0468df28399773aba6, type: 2}
-    loop: 0
-    playOnAwake: 0
-    frequentSound: 0
-    mute: 0
-    bypassEffects: 0
-    bypassListenerEffects: 0
-    bypassReverbZones: 0
-    priority: 128
-    volume: 1
-    pitch: 1
-    panStereo: 0
-    spatialBlend: 0
-    reverbZoneMix: 1
-    dopplerLevel: 1
-    spread: 0
-    minDistance: 1
-    maxDistance: 500
-    ignoreListenerVolume: 0
-    ignoreListenerPause: 0
-    rolloffMode: 0
+  groundCheckDistance: 0.1
+  groundTypeSounds:
+  - groundType: 3
+    soundData:
+      clip: {fileID: 8300000, guid: 1f0199a4c6005ec4abbb302f71bc036d, type: 3}
+      mixerGroup: {fileID: 4796280562796518393, guid: 0648aff6a08d3f0468df28399773aba6, type: 2}
+      loop: 0
+      playOnAwake: 0
+      frequentSound: 0
+      mute: 0
+      bypassEffects: 0
+      bypassListenerEffects: 0
+      bypassReverbZones: 0
+      priority: 128
+      volume: 1
+      pitch: 1
+      panStereo: 0
+      spatialBlend: 0
+      reverbZoneMix: 1
+      dopplerLevel: 1
+      spread: 0
+      minDistance: 1
+      maxDistance: 500
+      ignoreListenerVolume: 0
+      ignoreListenerPause: 0
+      rolloffMode: 0
 --- !u!1 &2339166616435476006
 GameObject:
   m_ObjectHideFlags: 0
@@ -769,6 +772,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tr: {fileID: 4503421132850581505}
+  volumeController: {fileID: 0}
   inputReader: {fileID: 11400000, guid: d70c9667a15577142ade86b23bc4b13e, type: 2}
   interactableLayer:
     serializedVersion: 2

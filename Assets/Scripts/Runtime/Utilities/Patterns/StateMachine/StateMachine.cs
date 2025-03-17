@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Runtime.Utilities.Patterns.StateMachine.Predicates;
 
 namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine
 {
     public class StateMachine
     {
-        StateNode currentNode;
-        readonly Dictionary<Type, StateNode> nodes = new();
-        readonly HashSet<Transition> anyTransitions = new();
+        StateNode _currentNode;
+        readonly Dictionary<Type, StateNode> _nodes = new(); 
+        readonly HashSet<Transition> _anyTransitions = new();
 
-        public IState CurrentState => currentNode.State;
+        public IState CurrentState => _currentNode.State;
 
         public void Update()
         {
@@ -18,67 +19,71 @@ namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine
             if (transition != null)
             {
                 ChangeState(transition.To);
-                foreach (var node in nodes.Values)
+
+                // Reset action predicate flags for all transitions
+                foreach (var node in _nodes.Values)
                     ResetActionPredicateFlags(node.Transitions);
-                ResetActionPredicateFlags(anyTransitions);
+
+                ResetActionPredicateFlags(_anyTransitions);
             }
 
-            currentNode.State?.Update();
+            _currentNode.State?.Update();
         }
 
-        static void ResetActionPredicateFlags(IEnumerable<Transition> transitions)
+        static void ResetActionPredicateFlags(HashSet<Transition> transitions)
         {
             foreach (var transition in transitions)
-                if (transition is Transition<ActionPredicate> actionPredicateTransition)
-                    actionPredicateTransition.condition.flag = false;
+                if (transition is Transition<ActionPredicate> actionTransition)
+                    actionTransition.condition.flag = false;
         }
 
-        public void FixedUpdate() => currentNode.State?.FixedUpdate();
+        public void FixedUpdate() => _currentNode.State?.FixedUpdate();
 
         public void SetState(IState state)
         {
-            currentNode = nodes[state.GetType()];
-            currentNode.State?.OnEnter();
+            _currentNode = _nodes[state.GetType()];
+            _currentNode.State?.OnEnter(); 
         }
 
         void ChangeState(IState state)
         {
-            if (state == currentNode.State) return;
+            if (state == _currentNode.State) return; // Skip if the state is the same
 
-            var previousState = currentNode.State;
-            var nextState = nodes[state.GetType()].State;
+            var previousState = _currentNode.State;
+            var nextState = _nodes[state.GetType()].State;
 
-            previousState?.OnExit();
+            previousState?.OnExit(); 
             nextState.OnEnter();
-            currentNode = nodes[state.GetType()];
+            _currentNode = _nodes[state.GetType()]; // Update the current node
         }
 
         public void AddTransition<T>(IState from, IState to, T condition)
-        => GetOrAddNode(from).AddTransition(GetOrAddNode(to).State, condition);
+            => GetOrAddNode(from).AddTransition(GetOrAddNode(to).State, condition);
 
         public void AddAnyTransition<T>(IState to, T condition)
-        => anyTransitions.Add(new Transition<T>(GetOrAddNode(to).State, condition));
+            => _anyTransitions.Add(new Transition<T>(GetOrAddNode(to).State, condition));
 
         Transition GetTransition()
         {
-            foreach (var transition in anyTransitions)
+            // Check "any" transitions first
+            foreach (var transition in _anyTransitions)
                 if (transition.Evaluate())
                     return transition;
 
-            foreach (var transition in currentNode.Transitions)
+            // Check transitions from the current state
+            foreach (var transition in _currentNode.Transitions)
                 if (transition.Evaluate())
                     return transition;
 
-            return null;
+            return null; 
         }
 
         StateNode GetOrAddNode(IState state)
         {
-            var node = nodes.GetValueOrDefault(state.GetType());
-            if (node == null)
+            if (!_nodes.TryGetValue(state.GetType(), out var node))
             {
-                node = new StateNode(state);
-                nodes[state.GetType()] = node;
+                node = new StateNode(state); // Create a new node if it doesn't exist
+                _nodes[state.GetType()] = node; // Add it to the dictionary
             }
 
             return node;
@@ -86,17 +91,17 @@ namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine
 
         class StateNode
         {
-            public IState State { get; }
-            public HashSet<Transition> Transitions { get; }
+            public IState State { get; } 
+            public HashSet<Transition> Transitions { get; } 
 
             public StateNode(IState state)
             {
                 State = state;
-                Transitions = new HashSet<Transition>();
+                Transitions = new HashSet<Transition>(); 
             }
 
             public void AddTransition<T>(IState to, T predicate)
-            => Transitions.Add(new Transition<T>(to, predicate));
+                => Transitions.Add(new Transition<T>(to, predicate));
         }
     }
 }

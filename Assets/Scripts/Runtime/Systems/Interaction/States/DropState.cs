@@ -1,6 +1,7 @@
 using Assets.Scripts.Runtime.Utilities.Patterns.StateMachine;
+using UnityEngine;
 
-namespace Assets.Scripts.Runtime.Systems.Interaction
+namespace Assets.Scripts.Runtime.Systems.Interaction.States
 {
     public class DropState : IState
     {
@@ -8,7 +9,11 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
 
         public DropState(InteractionController controller) => this.controller = controller;
 
-        public void OnEnter() => controller.OnDrop();
+        public void OnEnter()
+        {
+            controller.OnDrop();
+            Debug.Log("DropState");
+        }
 
         public void Update() => controller.UpdateDrop();
     }

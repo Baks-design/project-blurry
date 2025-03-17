@@ -5,7 +5,7 @@ namespace Assets.Scripts.Runtime.Systems.EventBus
 {
     /// <summary>
     /// A utility class, PredefinedAssemblyUtil, provides methods to interact with predefined assemblies.
-    /// It allows to get all types in the current AppDomain that implement from a specific Interface type.
+    /// It allows to get all types in the current AppDomain that implement a specific Interface type.
     /// For more details, <see href="https://docs.unity3d.com/2023.3/Documentation/Manual/ScriptCompileOrderFolders.html">visit Unity Documentation</see>
     /// </summary>
     public static class PredefinedAssemblyUtil
@@ -60,9 +60,9 @@ namespace Assets.Scripts.Runtime.Systems.EventBus
         public static List<Type> GetTypes(Type interfaceType)
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
             var assemblyTypes = new Dictionary<AssemblyType, Type[]>();
             var types = new List<Type>();
+            
             for (var i = 0; i < assemblies.Length; i++)
             {
                 var assemblyType = GetAssemblyType(assemblies[i].GetName().Name);

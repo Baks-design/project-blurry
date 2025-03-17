@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Events;
 using static InputSystem_Actions;
+using System;
 
 namespace Assets.Scripts.Runtime.Utilities.Helpers
 {
@@ -10,20 +10,20 @@ namespace Assets.Scripts.Runtime.Utilities.Helpers
     {
         public InputSystem_Actions inputActions;
 
-        public event UnityAction MoveForward = delegate { };
-        public event UnityAction<bool> MoveRunForward = delegate { };
-        public event UnityAction MoveBackward = delegate { };
-        public event UnityAction MoveStrafeRight = delegate { };
-        public event UnityAction MoveStrafeLeft = delegate { };
-        public event UnityAction MoveTurnRight = delegate { };
-        public event UnityAction MoveTurnLeft = delegate { };
-        public event UnityAction<bool> HoldLook = delegate { };
-        public event UnityAction<Vector2, bool> Look = delegate { };
-        public event UnityAction<bool> Pickup = delegate { };
-        public event UnityAction<bool> Drop = delegate { };
-        public event UnityAction Crouch = delegate { };
-        public event UnityAction OpenMenu = delegate { };
-        public event UnityAction CloseMenu = delegate { };
+        public event Action MoveForward = delegate { };
+        public event Action<bool> MoveRunForward = delegate { };
+        public event Action MoveBackward = delegate { };
+        public event Action MoveStrafeRight = delegate { };
+        public event Action MoveStrafeLeft = delegate { };
+        public event Action MoveTurnRight = delegate { };
+        public event Action MoveTurnLeft = delegate { };
+        public event Action<bool> HoldLook = delegate { };
+        public event Action<Vector2, bool> Look = delegate { };
+        public event Action<bool> Pickup = delegate { };
+        public event Action<bool> Drop = delegate { };
+        public event Action Crouch = delegate { };
+        public event Action OpenMenu = delegate { };
+        public event Action CloseMenu = delegate { };
 
         public void EnablePlayerActions()
         {

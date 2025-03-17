@@ -6,26 +6,6 @@ namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine
     {
         protected StateMachine stateMachine;
 
-        /// <summary>
-        /// Awake or Start can be used to declare all states and transitions.
-        /// </summary>
-        /// <example>
-        /// <code>
-        /// protected override void Awake() {
-        ///     base.Awake();
-        /// 
-        ///     var state = new State1(this);
-        ///     var anotherState = new State2(this);
-        ///
-        ///     At(state, anotherState, () => true);
-        ///     At(state, anotherState, myFunc);
-        ///     At(state, anotherState, myPredicate);
-        /// 
-        ///     Any(anotherState, () => true);
-        ///
-        ///     stateMachine.SetState(state);
-        /// </code> 
-        /// </example>
         protected virtual void Awake() => stateMachine = new StateMachine();
 
         protected virtual void Update() => stateMachine.Update();

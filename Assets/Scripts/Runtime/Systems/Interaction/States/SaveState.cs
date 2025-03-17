@@ -1,6 +1,7 @@
 using Assets.Scripts.Runtime.Utilities.Patterns.StateMachine;
+using UnityEngine;
 
-namespace Assets.Scripts.Runtime.Systems.Interaction
+namespace Assets.Scripts.Runtime.Systems.Interaction.States
 {
     public class SaveState : IState
     {
@@ -8,7 +9,11 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
 
         public SaveState(InteractionController controller) => this.controller = controller;
 
-        public void OnEnter() => controller.OnSave();
+        public void OnEnter()
+        {
+            controller.OnSave();
+            Debug.Log("SaveState");
+        }
 
         public void Update() => controller.UpdateSave();
     }

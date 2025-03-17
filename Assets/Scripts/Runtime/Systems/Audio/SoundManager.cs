@@ -82,6 +82,10 @@ namespace Assets.Scripts.Runtime.Systems.Audio
             activeSoundEmitters.Remove(soundEmitter);
         }
 
-        void OnDestroyPoolObject(SoundEmitter soundEmitter) => Destroy(soundEmitter.gameObject);
+        void OnDestroyPoolObject(SoundEmitter soundEmitter)
+        {
+            if (soundEmitter != null)
+                Destroy(soundEmitter.gameObject);
+        }
     }
 }

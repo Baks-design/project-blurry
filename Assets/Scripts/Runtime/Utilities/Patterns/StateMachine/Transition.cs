@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine
+namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine.Predicates
 {
     public abstract class Transition
     {
@@ -18,18 +18,12 @@ namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine
             this.condition = condition;
         }
 
-        public override bool Evaluate()
+        public override bool Evaluate() => condition switch
         {
-            if (condition is Func<bool> funcCondition)
-                return funcCondition.Invoke();
-
-            if (condition is ActionPredicate actionPredicateCondition)
-                return actionPredicateCondition.Evaluate();
-
-            if (condition is IPredicate predicateCondition)
-                return predicateCondition.Evaluate();
-
-            return false;
-        }
+            Func<bool> func => func.Invoke(),
+            ActionPredicate actionPredicate => actionPredicate.Evaluate(),
+            IPredicate predicate => predicate.Evaluate(),
+            _ => false
+        };
     }
 }

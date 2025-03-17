@@ -1,6 +1,7 @@
 ﻿using System;
 using Assets.Scripts.Runtime.Systems.EventBus;
 using Assets.Scripts.Runtime.Systems.EventBus.Events;
+using Assets.Scripts.Runtime.Systems.Interaction.States;
 using Assets.Scripts.Runtime.Utilities.Helpers;
 using Assets.Scripts.Runtime.Utilities.Patterns.StateMachine;
 using KBCore.Refs;
@@ -8,7 +9,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Runtime.Systems.Interaction
 {
-    public class InteractionController : StatefulEntity //FIXME
+    public class InteractionController : StatefulEntity
     {
         [SerializeField, Self] Transform tr;
         [SerializeField, Anywhere] VolumeController volumeController; //TODO: Add VContainer
@@ -38,20 +39,18 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
             var drop = new DropState(this);
             var save = new SaveState(this);
 
-            At(search, pickUp, pickUpInput && hitTransform);
+            // At(search, pickUp, pickUpInput && lastHitSomething);
 
-            At(pickUp, save, pickUpInput && pickable != null);
-            At(pickUp, drop, dropInput && pickable != null);
+            // At(pickUp, save, pickUpInput && pickable != null);
+            // At(pickUp, drop, dropInput && pickable != null);
 
-            At(drop, search, pickable == null);
-            At(save, search, pickable == null);
+            // At(drop, search, pickable == null);
+            // At(save, search, pickable == null);
 
             stateMachine.SetState(search);
         }
 
         void GetVars() => cameraTransform = Camera.main.transform;
-
-        protected override void Update() => base.Update();
         #endregion
 
         #region Inputs
@@ -81,7 +80,8 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
         {
             lastRay = new Ray(cameraTransform.position, cameraTransform.forward);
             var hitCount = Physics.SphereCastNonAlloc(
-                lastRay, raySphereRadius, hits, rayDistance, interactableLayer, QueryTriggerInteraction.Ignore);
+                lastRay.origin, raySphereRadius, lastRay.direction,
+                hits, rayDistance, interactableLayer, QueryTriggerInteraction.Ignore);
             lastHitSomething = hitCount > 0;
             hitTransform = lastHitSomething ? hits[0].transform : null;
         }
@@ -90,12 +90,13 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
         #region Pick State
         public void OnPickUp()
         {
-            hitTransform.TryGetComponent(out pickable);
+            if (hitTransform == null || !hitTransform.TryGetComponent(out pickable)) return;
+
             EventBus<PickItemEvent>.Raise(new PickItemEvent { isMoveValid = false });
             volumeController.ToggleDepthOfField(true);
         }
 
-        public void UpdatePickUp() => pickable.OnPickUp(cameraTransform.position, cameraTransform.rotation, lookInput);
+        public void UpdatePickUp() => pickable?.OnPickUp(cameraTransform.position, cameraTransform.rotation, lookInput);
         #endregion
 
         #region Drop State
@@ -105,7 +106,7 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
             volumeController.ToggleDepthOfField(false);
         }
 
-        public void UpdateDrop() => pickable.OnDrop(tr.position);
+        public void UpdateDrop() => pickable?.OnDrop(tr.position);
         #endregion
 
         #region Save State
@@ -113,9 +114,10 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
         {
             EventBus<PickItemEvent>.Raise(new PickItemEvent { isMoveValid = true });
             volumeController.ToggleDepthOfField(false);
+            //TODO: Inventory
         }
 
-        public void UpdateSave() => pickable.OnSave(tr.position);
+        public void UpdateSave() => pickable?.OnSave(tr.position);
         #endregion
 
         #region Debug

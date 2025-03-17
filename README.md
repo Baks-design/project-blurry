@@ -10,3 +10,5 @@ Repos used until now:
     https://github.com/arimger/Unity-Editor-Toolbox.git#upm
     https://github.com/smkplus/CustomToolbar.git#master
     https://github.com/adammyhre/Unity-Audio-Pooling
+    https://github.com/hadashiA/VContainer
+    https://github.com/adammyhre/Unity-Inventory-System/tree/master

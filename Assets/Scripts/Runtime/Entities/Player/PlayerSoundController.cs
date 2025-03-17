@@ -1,46 +1,80 @@
+using System;
 using Assets.Scripts.Runtime.Systems.Audio;
 using KBCore.Refs;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Assets.Scripts.Runtime.Entities.Player
 {
     public class PlayerSoundController : MonoBehaviour
     {
-        [SerializeField, Parent] PlayerMovementController movementController;
-        [SerializeField, Anywhere] Transform rightFoot, leftFoot;
-        [SerializeField, Anywhere] SoundData stepSoundData, blockSoundData;
+        [SerializeField, Parent] PlayerMovementController movementController; 
+        [SerializeField, Anywhere] Transform rightFoot, leftFoot; 
+        [SerializeField, Anywhere] SoundData defaultStepSoundData; 
+        [SerializeField] GroundTypeSound[] groundTypeSounds; 
+        [Serializable]
+        public struct GroundTypeSound
+        {
+            public GroundType groundType; 
+            public SoundData soundData; 
+        }
         bool _nextStepLeft;
-        SoundBuilder soundBuilder;
+        SoundBuilder _soundBuilder;
 
-        void Start() => soundBuilder = SoundManager.Instance.CreateSoundBuilder();
+        void Start()
+        {
+            if (SoundManager.Instance != null)
+                _soundBuilder = SoundManager.Instance.CreateSoundBuilder();
+            else
+                Assert.IsNull(SoundManager.Instance, "SoundManager instance is null. Ensure SoundManager is initialized.");
+        }
 
         void OnEnable()
         {
-            movementController.BlockedEvent += Block;
-            movementController.StepEvent += Step;
-            movementController.TurnEvent += Turn;
+            movementController.OnStep += PlayStepSound;
+            movementController.OnRun += PlayStepSound;
         }
 
         void OnDisable()
         {
-            movementController.BlockedEvent -= Block;
-            movementController.StepEvent -= Step;
-            movementController.TurnEvent -= Turn;
+            movementController.OnStep -= PlayStepSound;
+            movementController.OnRun -= PlayStepSound;
         }
 
-        void Step()
+        void PlayStepSound()
         {
-            var foot = _nextStepLeft ? leftFoot : rightFoot;
-            soundBuilder.WithRandomPitch().WithPosition(foot.position).Play(stepSoundData);
+            if (!IsGrounded(out Transform foot, out GroundType groundType)) return;
+
+            var soundToPlay = GetSoundForGroundType(groundType);
+            _soundBuilder.WithRandomPitch().WithPosition(foot.position).Play(soundToPlay);
+
             _nextStepLeft = !_nextStepLeft;
         }
 
-        void Turn()
+        bool IsGrounded(out Transform foot, out GroundType groundType)
         {
-            soundBuilder.WithRandomPitch().WithPosition(leftFoot.position).Play(stepSoundData);
-            soundBuilder.WithRandomPitch().WithPosition(rightFoot.position).Play(stepSoundData);
+            foot = _nextStepLeft ? leftFoot : rightFoot;
+
+            if (Physics.Raycast(foot.position, Vector3.down, out var hit))
+            {
+                if (hit.collider.TryGetComponent(out AudioTag audioTag))
+                {
+                    groundType = audioTag.GroundTypeTag;
+                    return true;
+                }
+            }
+
+            groundType = GroundType.None;
+            return false;
         }
 
-        void Block() => soundBuilder.Play(blockSoundData);
+        SoundData GetSoundForGroundType(GroundType groundType)
+        {
+            foreach (var groundTypeSound in groundTypeSounds)
+                if (groundTypeSound.groundType == groundType)
+                    return groundTypeSound.soundData;
+           
+            return defaultStepSoundData;
+        }
     }
 }

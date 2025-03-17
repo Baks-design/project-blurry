@@ -1,4 +1,6 @@
-﻿namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine
+﻿using Assets.Scripts.Runtime.Utilities.Patterns.StateMachine.Predicates;
+
+namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine
 {
     public interface ITransition
     {

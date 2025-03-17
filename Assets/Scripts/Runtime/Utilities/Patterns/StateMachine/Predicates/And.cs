@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine
+namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine.Predicates
 {
     public class And : IPredicate
     {
