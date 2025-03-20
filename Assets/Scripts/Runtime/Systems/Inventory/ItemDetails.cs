@@ -1,7 +1,8 @@
 ﻿using System;
+using Assets.Scripts.Runtime.Systems.Inventory.Helpers;
 using UnityEngine;
 
-namespace Systems.Inventory
+namespace Assets.Scripts.Runtime.Systems.Inventory
 {
     [Serializable]
     [CreateAssetMenu(menuName = "Inventory/Item")]
@@ -10,14 +11,11 @@ namespace Systems.Inventory
         [BeginGroup("ItemSplit", Style = GroupStyle.Round)]
         public string Name;
         public int maxStack = 1;
-
         [EditorButton(nameof(AssignNewGuid), "<b>My</b> AssignNewGuid", activityType: ButtonActivityType.OnPlayMode,
         ValidateMethodName = nameof(ValidationMethod))]
         public SerializableGuid Id = SerializableGuid.NewGuid();
-
         [AssetPreview]
         public Sprite Icon;
-
         [EndGroup]
         [Label("My Custom Header", skinStyle: SkinStyle.Box, Alignment = TextAnchor.MiddleCenter)]
         public string Description;

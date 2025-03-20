@@ -1,32 +1,30 @@
 using System;
 using Assets.Scripts.Runtime.Systems.Audio;
+using Assets.Scripts.Runtime.Utilities.Patterns.ServicesLocator;
 using KBCore.Refs;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace Assets.Scripts.Runtime.Entities.Player
 {
     public class PlayerSoundController : MonoBehaviour
     {
-        [SerializeField, Parent] PlayerMovementController movementController; 
-        [SerializeField, Anywhere] Transform rightFoot, leftFoot; 
-        [SerializeField, Anywhere] SoundData defaultStepSoundData; 
-        [SerializeField] GroundTypeSound[] groundTypeSounds; 
+        [SerializeField, Parent] PlayerMovementController movementController;
+        [SerializeField, Anywhere] Transform rightFoot, leftFoot;
+        [SerializeField] GroundTypeSound[] groundTypeSounds;
         [Serializable]
         public struct GroundTypeSound
         {
-            public GroundType groundType; 
-            public SoundData soundData; 
+            public GroundType groundType;
+            public SoundData soundData;
         }
         bool _nextStepLeft;
         SoundBuilder _soundBuilder;
+        ISoundService soundService;
 
         void Start()
         {
-            if (SoundManager.Instance != null)
-                _soundBuilder = SoundManager.Instance.CreateSoundBuilder();
-            else
-                Assert.IsNull(SoundManager.Instance, "SoundManager instance is null. Ensure SoundManager is initialized.");
+            ServiceLocator.Global.Get(out soundService);
+            _soundBuilder = soundService.CreateSoundBuilder();
         }
 
         void OnEnable()
@@ -73,8 +71,7 @@ namespace Assets.Scripts.Runtime.Entities.Player
             foreach (var groundTypeSound in groundTypeSounds)
                 if (groundTypeSound.groundType == groundType)
                     return groundTypeSound.soundData;
-           
-            return defaultStepSoundData;
+            return null;
         }
     }
 }

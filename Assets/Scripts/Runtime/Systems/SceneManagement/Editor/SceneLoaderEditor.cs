@@ -1,27 +1,25 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Systems.SceneManagement.Editor {
-    [CustomEditor(typeof(SceneLoader))]
-    public class SceneLoaderEditor : UnityEditor.Editor {
-        public override void OnInspectorGUI() {
+namespace Assets.Scripts.Runtime.Systems.SceneManagement.Editor
+{
+    [CustomEditor(typeof(SceneLoaderService))]
+    public class SceneLoaderEditor : UnityEditor.Editor
+    {
+        public override void OnInspectorGUI()
+        {
             DrawDefaultInspector();
 
-            SceneLoader sceneLoader = (SceneLoader) target;
+            var sceneLoader = (SceneLoaderService)target;
 
-            if (EditorApplication.isPlaying && GUILayout.Button("Load First Scene Group")) {
+            if (EditorApplication.isPlaying && GUILayout.Button("Load First Scene Group"))
                 LoadSceneGroup(sceneLoader, 0);
-            }
-            
-            if (EditorApplication.isPlaying && GUILayout.Button("Load Second Scene Group")) {
+                
+            if (EditorApplication.isPlaying && GUILayout.Button("Load Second Scene Group"))
                 LoadSceneGroup(sceneLoader, 1);
-            }
         }
 
-        static async void LoadSceneGroup(SceneLoader sceneLoader, int index) {
-            await sceneLoader.LoadSceneGroup(index);
-        }
+        static async void LoadSceneGroup(SceneLoaderService sceneLoader, int index)
+        => await sceneLoader.LoadSceneGroup(index);
     }
-    
-    
 }

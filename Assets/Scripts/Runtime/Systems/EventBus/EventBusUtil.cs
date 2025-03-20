@@ -16,7 +16,6 @@ namespace Assets.Scripts.Runtime.Systems.EventBus
     {
         public static IReadOnlyList<Type> EventTypes { get; set; }
         public static IReadOnlyList<Type> EventBusTypes { get; set; }
-
 #if UNITY_EDITOR
         public static PlayModeStateChange PlayModeState { get; set; }
 

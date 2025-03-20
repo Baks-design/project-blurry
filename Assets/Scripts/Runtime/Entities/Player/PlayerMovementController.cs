@@ -12,7 +12,6 @@ namespace Assets.Scripts.Runtime.Entities.Player
         [SerializeField, Self] Transform _transform; 
         [Header("Grid Settings")]
         [SerializeField] LayerMask collisionLayerMask; 
-        [SerializeField, Range(1f, 5f)] float gridSize = 3f; 
         [Header("Walk Settings")]
         [SerializeField, Range(1f, 5f)] float walkSpeed = 1f; 
         [SerializeField, Range(1f, 10f)] float turnSpeed = 5f; 
@@ -25,7 +24,7 @@ namespace Assets.Scripts.Runtime.Entities.Player
         [Header("Step Settings")]
         [SerializeField, Range(1f, 5f)] float maximumStepHeight = 2f; 
         float _rotationTime, _curveTime, _stepTime, _stepTimeCounter, _currentSpeed;
-        const float RightHand = 90f, LeftHand = -RightHand, ApproximationThreshold = 0.025f;
+        const float gridSize = 3f, RightHand = 90f, LeftHand = -RightHand, ApproximationThreshold = 0.025f;
         Vector3 _moveFromPosition, _moveTowardsPosition;
         Quaternion _rotateFromDirection, _rotateTowardsDirection;
         AnimationCurve _currentAnimationCurve, _currentHeadBobCurve;
@@ -43,11 +42,10 @@ namespace Assets.Scripts.Runtime.Entities.Player
         public event Action OnRun = delegate { };
 
         #region Initialization
-        protected override void Awake()
+        void Start()
         {
-            base.Awake();
-            SetupStateMachine();
             InitializeVariables();
+            SetupStateMachine();
         }
 
         void SetupStateMachine()
@@ -126,7 +124,7 @@ namespace Assets.Scripts.Runtime.Entities.Player
             if (_stepTimeCounter > _stepTime)
             {
                 _stepTimeCounter = 0f;
-                OnStep.Invoke(); // Trigger step event
+                OnStep.Invoke(); 
             }
 
             // Calculate new position and apply head bobbing

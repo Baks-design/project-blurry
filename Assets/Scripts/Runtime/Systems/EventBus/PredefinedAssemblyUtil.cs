@@ -44,6 +44,7 @@ namespace Assets.Scripts.Runtime.Systems.EventBus
         static void AddTypesFromAssembly(Type[] assemblyTypes, Type interfaceType, ICollection<Type> results)
         {
             if (assemblyTypes == null) return;
+            
             for (var i = 0; i < assemblyTypes.Length; i++)
             {
                 var type = assemblyTypes[i];

@@ -1,10 +1,15 @@
 using System;
-using Systems.Persistence;
+using Assets.Scripts.Runtime.Systems.Inventory.Helpers;
 using UnityEngine;
 
-[Serializable]
-public class PlayerData : ISaveable {
-    [field: SerializeField] public SerializableGuid Id { get; set; }
-    public Vector3 position;
-    public Quaternion rotation;
+namespace Assets.Scripts.Runtime.Systems.Persistence
+{
+    [Serializable]
+    public class PlayerData : ISaveable
+    {
+        public Vector3 position;
+        public Quaternion rotation;
+        
+        [field: SerializeField] public SerializableGuid Id { get; set; }
+    }
 }

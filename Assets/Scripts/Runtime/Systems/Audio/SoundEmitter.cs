@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Runtime.Utilities.Extensions;
+using Assets.Scripts.Runtime.Utilities.Patterns.ServicesLocator;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -9,11 +10,14 @@ namespace Assets.Scripts.Runtime.Systems.Audio
     public class SoundEmitter : MonoBehaviour
     {
         AudioSource audioSource;
+        ISoundService soundService;
 
         public SoundData Data { get; private set; }
         public LinkedListNode<SoundEmitter> Node { get; set; }
 
         void Awake() => audioSource = gameObject.GetOrAdd<AudioSource>();
+
+        void Start() => ServiceLocator.Global.Get(out soundService);
 
         public void Initialize(SoundData data)
         {
@@ -58,7 +62,7 @@ namespace Assets.Scripts.Runtime.Systems.Audio
         public void Stop()
         {
             audioSource.Stop();
-            SoundManager.Instance.ReturnToPool(this);
+            soundService.ReturnToPool(this);
         }
 
         public void WithRandomPitch(float min = -0.05f, float max = 0.05f)

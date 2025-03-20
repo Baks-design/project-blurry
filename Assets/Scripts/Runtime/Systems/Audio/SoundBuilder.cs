@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Assets.Scripts.Runtime.Systems.Audio
 {
@@ -6,9 +7,9 @@ namespace Assets.Scripts.Runtime.Systems.Audio
     {
         bool randomPitch;
         Vector3 position = Vector3.zero;
-        readonly SoundManager soundManager;
+        readonly SoundService soundManager;
 
-        public SoundBuilder(SoundManager soundManager) => this.soundManager = soundManager;
+        public SoundBuilder(SoundService soundManager) => this.soundManager = soundManager;
 
         public SoundBuilder WithPosition(Vector3 position)
         {
@@ -26,7 +27,7 @@ namespace Assets.Scripts.Runtime.Systems.Audio
         {
             if (soundData == null)
             {
-                Debug.LogError("SoundData is null");
+                Assert.IsNull(soundData, "SoundData is null");
                 return;
             }
 

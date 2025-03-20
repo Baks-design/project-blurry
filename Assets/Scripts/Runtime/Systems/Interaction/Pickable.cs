@@ -1,4 +1,5 @@
-﻿using KBCore.Refs;
+﻿using System.Collections;
+using KBCore.Refs;
 using UnityEngine;
 
 namespace Assets.Scripts.Runtime.Systems.Interaction
@@ -19,12 +20,39 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
 
             IsPicked = true;
 
-            var finalPos = position + Camera.main.transform.forward * distanceFromCamera;
-            tr.SetPositionAndRotation(Vector3.Lerp(tr.position, finalPos, positionSpeed * Time.deltaTime), rotation);
+            // Disable the collider to prevent physics interference
+            if (coll != null)
+                coll.enabled = false;
 
-            var targetEulerAngles = new Vector3(-input.y, input.x, 0f);
-            var targetRotation = Quaternion.Euler(targetEulerAngles);
-            tr.localRotation = Quaternion.Slerp(tr.localRotation, targetRotation, rotationSpeed * Time.deltaTime);
+            // Update the object's position and rotation every frame while picked up
+            StartCoroutine(UpdatePickedObject(input));
+        }
+
+        IEnumerator UpdatePickedObject(Vector2 input)
+        {
+            while (IsPicked)
+            {
+                // Calculate the desired position in front of the camera
+                Vector3 finalPos = Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera;
+
+                // Smoothly move the object to the desired position
+                tr.position = Vector3.Lerp(tr.position, finalPos, positionSpeed * Time.deltaTime);
+
+                // Calculate the desired rotation based on input
+                Vector3 targetEulerAngles = new Vector3(-input.y, input.x, 0f);
+                Quaternion targetRotation = Quaternion.Euler(targetEulerAngles);
+
+                // Smoothly rotate the object to the desired rotation
+                tr.rotation = Quaternion.Slerp(tr.rotation, Camera.main.transform.rotation * targetRotation, rotationSpeed * Time.deltaTime);
+
+                yield return null; // Wait for the next frame
+            }
+
+            // Re-enable the collider when the object is dropped
+            if (coll != null)
+            {
+                coll.enabled = true;
+            }
         }
 
         public async void OnSave(Vector3 playerPos)
@@ -41,7 +69,7 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
                 await Awaitable.NextFrameAsync();
             }
 
-            Destroy(gameObject);
+            //Destroy(gameObject);
         }
 
         public void OnDrop(Vector3 position)

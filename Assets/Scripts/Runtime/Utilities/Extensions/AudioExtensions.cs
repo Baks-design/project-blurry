@@ -15,7 +15,7 @@ namespace Assets.Scripts.Runtime.Utilities.Extensions
         ///
         /// This method is useful for normalizing UI Volume Sliders used with Unity's Audio Mixer.
         /// </summary>
-        public static float ToLogarithmicVolume(this float sliderValue) => Mathf.Log10(Mathf.Max(sliderValue, 0.0001f)) * 20;
+        public static float ToLogarithmicVolume(this float sliderValue) => Mathf.Log10(Mathf.Max(sliderValue, 0.0001f)) * 20f;
 
         /// <summary>
         /// Given a fraction in the range of [0, 1], convert it to a logarithmic scale (also in range [0, 1])
@@ -29,6 +29,6 @@ namespace Assets.Scripts.Runtime.Utilities.Extensions
         ///
         /// This method is useful for improved fading effects between Audio Clips.
         /// /// </summary>
-        public static float ToLogarithmicFraction(this float fraction) => Mathf.Log10(1 + 9 * fraction) / Mathf.Log10(10);
+        public static float ToLogarithmicFraction(this float fraction) => Mathf.Log10(1f + 9f * fraction) / Mathf.Log10(10f);
     }
 }
