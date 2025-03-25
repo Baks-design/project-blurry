@@ -17,7 +17,7 @@ namespace Assets.Scripts.Runtime.Utilities.Helpers
         public event Action MoveStrafeLeft = delegate { };
         public event Action MoveTurnRight = delegate { };
         public event Action MoveTurnLeft = delegate { };
-        public event Action<bool> HoldLook = delegate { };
+        public event Action LookMode = delegate { };
         public event Action<Vector2, bool> Look = delegate { };
         public event Action<bool> Pickup = delegate { };
         public event Action<bool> Drop = delegate { };
@@ -36,7 +36,8 @@ namespace Assets.Scripts.Runtime.Utilities.Helpers
         }
 
         #region Event Handlers
-        public void OnLook(InputAction.CallbackContext context) => Look.Invoke(context.ReadValue<Vector2>(), IsDeviceMouse(context));
+        public void OnLook(InputAction.CallbackContext context)
+        => Look.Invoke(context.ReadValue<Vector2>(), IsDeviceMouse(context));
 
         bool IsDeviceMouse(InputAction.CallbackContext context) => context.control.device.name == "Mouse";
 
@@ -86,17 +87,10 @@ namespace Assets.Scripts.Runtime.Utilities.Helpers
                 MoveTurnLeft.Invoke();
         }
 
-        public void OnHoldLook(InputAction.CallbackContext context)
+        public void OnLookMode(InputAction.CallbackContext context)
         {
-            switch (context.phase)
-            {
-                case InputActionPhase.Started:
-                    HoldLook.Invoke(true);
-                    break;
-                case InputActionPhase.Canceled:
-                    HoldLook.Invoke(false);
-                    break;
-            }
+            if (context.phase is InputActionPhase.Started)
+                LookMode.Invoke();
         }
 
         public void OnCrouch(InputAction.CallbackContext context)
@@ -145,7 +139,8 @@ namespace Assets.Scripts.Runtime.Utilities.Helpers
         #endregion
 
         #region Misc
-        public void SetCursorLockState(bool isLocked) => Cursor.lockState = isLocked ? CursorLockMode.Locked : CursorLockMode.None;
+        public void SetCursorLockState(bool isLocked)
+        => Cursor.lockState = isLocked ? CursorLockMode.Locked : CursorLockMode.None;
         #endregion
     }
 }

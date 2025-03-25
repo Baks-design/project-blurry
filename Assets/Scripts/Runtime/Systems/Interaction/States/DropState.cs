@@ -9,12 +9,12 @@ namespace Assets.Scripts.Runtime.Systems.Interaction.States
 
         public DropState(InteractionController controller) => this.controller = controller;
 
-        public void OnEnter()
-        {
-            controller.OnDrop();
-            Debug.Log("DropState");
-        }
+        public void OnEnter() => controller.OnDrop();
 
-        public void Update() => controller.UpdateDrop();
+        public void Update()
+        {
+            Debug.Log("Drop State");
+            controller.OnDrop();
+        }
     }
 }

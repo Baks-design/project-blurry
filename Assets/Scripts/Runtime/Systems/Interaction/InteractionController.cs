@@ -1,4 +1,6 @@
 ﻿using System;
+using UnityEngine;
+using KBCore.Refs;
 using Assets.Scripts.Runtime.Components.VFX;
 using Assets.Scripts.Runtime.Systems.EventBus;
 using Assets.Scripts.Runtime.Systems.EventBus.Events;
@@ -6,56 +8,65 @@ using Assets.Scripts.Runtime.Systems.Interaction.States;
 using Assets.Scripts.Runtime.Utilities.Helpers;
 using Assets.Scripts.Runtime.Utilities.Patterns.ServicesLocator;
 using Assets.Scripts.Runtime.Utilities.Patterns.StateMachine;
-using KBCore.Refs;
-using UnityEngine;
 
 namespace Assets.Scripts.Runtime.Systems.Interaction
 {
-    public class InteractionController : MonoBehaviour //       StatefulEntity
+    public class InteractionController : StatefulEntity
     {
         [SerializeField, Self] Transform tr;
         [SerializeField, Anywhere] InputReader inputReader;
         [SerializeField] LayerMask interactableLayer;
         [SerializeField, Range(0.5f, 5f)] float rayDistance = 2f;
         [SerializeField, Range(0.1f, 1f)] float raySphereRadius = 0.5f;
-        bool lastHitSomething, pickUpInput, dropInput;
-        Ray lastRay;
+        bool pickUpInput;
+        bool dropInput;
         Vector2 lookInput;
-        Transform hitTransform, cameraTransform;
-        readonly RaycastHit[] hits = new RaycastHit[1];
-        IPickable pickable;
+        Transform cameraTransform;
+        Transform getSomething;
+        RaycastHit[] hits;
+        IPickable getPickable;
         IVolumeService volumeService;
 
-        #region Setup
-        void Awake()
+        protected override void Awake()
         {
-            //base.Awake();
-            //SetupStateMachine();
-            GetVars();
+            base.Awake();
+            SetupStateMachine();
         }
 
-        // void SetupStateMachine() //FIXME: Interaction States
-        // {
-        //     var search = new SearchState(this);
-        //     var pickUp = new PickUpState(this);
-        //     var drop = new DropState(this);
-        //     var save = new SaveState(this);
+        void SetupStateMachine()
+        {
+            var search = new SearchState(this);
+            var pickUp = new PickUpState(this);
+            var drop = new DropState(this);
+            var save = new SaveState(this);
 
-        //     At(search, pickUp, pickUpInput && lastHitSomething);
-        //     At(pickUp, save, pickUpInput && pickable != null);
-        //     At(pickUp, drop, dropInput && pickable != null);
-        //     At(drop, search, pickable == null);
-        //     At(save, search, pickable == null);
+            At(drop, search, getPickable == null);
+            At(save, search, getPickable == null);
+            At(search, pickUp, pickUpInput && getPickable != null);
+            At(pickUp, save, pickUpInput && getPickable != null);
+            At(pickUp, drop, dropInput && getPickable != null);
 
-        //     stateMachine.SetState(search);
-        // }
+            stateMachine.SetState(search);
+        }
 
-        void GetVars() => cameraTransform = Camera.main.transform;
+        void Start()
+        {
+            GetServices();
+            InitVars();
+        }
 
-        void Start() => ServiceLocator.Global.Get(out volumeService);
-        #endregion
+        void GetServices() => ServiceLocator.Global.Get(out volumeService);
 
-        #region Inputs
+        void InitVars()
+        {
+            pickUpInput = false;
+            dropInput = false;
+            lookInput = Vector2.zero;
+            cameraTransform = Camera.main.transform;
+            getSomething = null;
+            hits = new RaycastHit[1];
+        }
+
         void OnEnable()
         {
             inputReader.Look += LookInput;
@@ -70,83 +81,47 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
             inputReader.Drop -= DropInput;
         }
 
-        void LookInput(Vector2 input, bool isC) => lookInput = input;
+        void LookInput(Vector2 input, bool _) => lookInput = input;
 
-        void PickupInput(bool input) => pickUpInput = input;
+        void PickupInput(bool input)
+        {
+            pickUpInput = input;
+            
+            if (getSomething != null)
+                getSomething.TryGetComponent(out getPickable);
+        }
 
         void DropInput(bool input) => dropInput = input;
-        #endregion
 
-        void Update()
+        public void OnCheck()
         {
-            //base.Update();
-            CheckForInteractable();
-
-            if (pickUpInput)
-                OnPickUp();
-            if (pickUpInput)
-                OnSave();
-            if (dropInput)
-                OnDrop();
-        }
-
-        #region Search State
-        public void CheckForInteractable()
-        {
-            var lastRay = new Ray(cameraTransform.position, cameraTransform.forward);
             var hitCount = Physics.SphereCastNonAlloc(
-                lastRay.origin, raySphereRadius, lastRay.direction,
+                cameraTransform.position, raySphereRadius, cameraTransform.forward,
                 hits, rayDistance, interactableLayer, QueryTriggerInteraction.Ignore);
-            var lastHitSomething = hitCount > 0;
-            hitTransform = lastHitSomething ? hits[0].transform : null;
-        }
-        #endregion
 
-        #region Pick State
+            var lastHitSomething = hitCount > 0;
+            getSomething = lastHitSomething ? hits[0].transform : null;
+        }
+
         public void OnPickUp()
         {
-            if (hitTransform != null && hitTransform.TryGetComponent(out pickable))
-            {
-                if (pickable != null && !pickable.IsPicked)
-                {
-                    EventBus<PickItemEvent>.Raise(new PickItemEvent { isMoveValid = false });
-                    volumeService.ToggleDepthOfField(true);
-                    pickable.OnPickUp(cameraTransform.position, cameraTransform.rotation, lookInput);
-                }
-            }
+            volumeService.ToggleDepthOfField(true);
+            getPickable.OnPickUp(cameraTransform.position, cameraTransform.rotation, lookInput);
         }
 
-        public void UpdatePickUp() { }
-        #endregion
-
-        #region Drop State
         public void OnDrop()
         {
-            if (pickable != null && pickable.IsPicked)
-            {
-                EventBus<PickItemEvent>.Raise(new PickItemEvent { isMoveValid = true });
-                volumeService.ToggleDepthOfField(false);
-                pickable.OnDrop(tr.position);
-                pickable = null;
-            }
+            volumeService.ToggleDepthOfField(false);
+            getPickable.OnDrop(tr.position);
+            getPickable = null;
         }
 
-        public void UpdateDrop() { }
-        #endregion
-
-        #region Save State
         public void OnSave()
         {
-            if (pickable != null && pickable.IsPicked)
-            {
-                EventBus<PickItemEvent>.Raise(new PickItemEvent { isMoveValid = true });
-                volumeService.ToggleDepthOfField(false);
-                pickable.OnSave(tr.position);
-                //TODO: Add to inventory
-            }
+            volumeService.ToggleDepthOfField(false);
+            getPickable.OnSave(tr.position);
+            getPickable = null;
+            // TODO: Add to inventory
         }
-
-        public void UpdateSave() { }
-        #endregion
     }
 }

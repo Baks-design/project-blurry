@@ -12,18 +12,18 @@ namespace Assets.Scripts.Runtime.Entities.Player
     public class MovementQueue : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField, Self] PlayerMovementController movementController; 
-        [SerializeField, Anywhere] InputReader inputReader; 
+        [SerializeField, Self] PlayerMovementController movementController;
+        [SerializeField, Anywhere] InputReader inputReader;
         [Header("Queue Settings")]
         [SerializeField, Range(1, 5)] int QueueDepth = 1;
         [SerializeField, Range(0.5f, 5f)] float keyPressThresholdTime = 1f;
         bool _isRunHold;
-        bool _isMoveValid = true; 
-        float _forwardKeyPressedTime; 
-        Queue<Action> _movementQueue; 
+        bool _isMoveValid;
+        float _forwardKeyPressedTime;
+        Queue<Action> _movementQueue;
 
         public event Action OnEventIfTheCommandIsNotQueable = delegate { };
-        EventBinding<PickItemEvent> _pickItemEventBinding;
+        EventBinding<LockPlayerMovementEvent> _lockPlayerMovementEventBinding;
 
         void Awake()
         {
@@ -33,6 +33,18 @@ namespace Assets.Scripts.Runtime.Entities.Player
 
         void OnEnable()
         {
+            SubInputEvents();
+            SubBusEvents();
+        }
+
+        void OnDisable()
+        {
+            UnsubInputEvents();
+            UnsubBusEvents();
+        }
+
+        void SubInputEvents()
+        {
             movementController.OnBlocked += FlushQueue;
             inputReader.MoveForward += Forward;
             inputReader.MoveRunForward += RunForward;
@@ -41,12 +53,15 @@ namespace Assets.Scripts.Runtime.Entities.Player
             inputReader.MoveStrafeLeft += StrafeLeft;
             inputReader.MoveTurnRight += TurnRight;
             inputReader.MoveTurnLeft += TurnLeft;
-
-            _pickItemEventBinding = new EventBinding<PickItemEvent>(HandlePickItemEvent);
-            EventBus<PickItemEvent>.Register(_pickItemEventBinding);
         }
 
-        void OnDisable()
+        void SubBusEvents()
+        {
+            _lockPlayerMovementEventBinding = new EventBinding<LockPlayerMovementEvent>(HandleLockPlayerMovementEvent);
+            EventBus<LockPlayerMovementEvent>.Register(_lockPlayerMovementEventBinding);
+        }
+
+        void UnsubInputEvents()
         {
             movementController.OnBlocked -= FlushQueue;
             inputReader.MoveForward -= Forward;
@@ -56,27 +71,39 @@ namespace Assets.Scripts.Runtime.Entities.Player
             inputReader.MoveStrafeLeft -= StrafeLeft;
             inputReader.MoveTurnRight -= TurnRight;
             inputReader.MoveTurnLeft -= TurnLeft;
-
-            EventBus<PickItemEvent>.Deregister(_pickItemEventBinding);
         }
 
+        void UnsubBusEvents() => EventBus<LockPlayerMovementEvent>.Deregister(_lockPlayerMovementEventBinding);
+
+        void HandleLockPlayerMovementEvent(LockPlayerMovementEvent ev)
+        {
+            _isMoveValid = ev.isMoveValid;
+            _movementQueue.Clear();
+        }
+
+        void RunForward(bool isRun) => _isRunHold = isRun;
         void Forward() => QueueCommand(() => movementController.MoveForward());
-        void RunForward(bool isRun) => _isRunHold = isRun; 
         void Backward() => QueueCommand(() => movementController.MoveBackward());
         void StrafeRight() => QueueCommand(() => movementController.StrafeRight());
         void StrafeLeft() => QueueCommand(() => movementController.StrafeLeft());
         void TurnRight() => QueueCommand(() => movementController.TurnRight());
         void TurnLeft() => QueueCommand(() => movementController.TurnLeft());
 
-        void HandlePickItemEvent(PickItemEvent pickItemEvent) => _isMoveValid = pickItemEvent.isMoveValid; 
-
         void Start()
         {
             InitQueue();
+            InitVars();
             ResetKeyPressTimer();
         }
 
         void InitQueue() => _movementQueue = new Queue<Action>(QueueDepth);
+
+        void InitVars()
+        {
+            _isRunHold = false;
+            _isMoveValid = true;
+            _forwardKeyPressedTime = 0f;
+        }
 
         void Update()
         {
@@ -146,6 +173,6 @@ namespace Assets.Scripts.Runtime.Entities.Player
             movementController.SwitchToWalking();
         }
 
-        void ResetKeyPressTimer() => _forwardKeyPressedTime = 0f; 
+        void ResetKeyPressTimer() => _forwardKeyPressedTime = 0f;
     }
 }

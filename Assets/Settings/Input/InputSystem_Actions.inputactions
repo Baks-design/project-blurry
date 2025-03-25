@@ -69,7 +69,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "HoldLook",
+                    "name": "LookMode",
                     "type": "Button",
                     "id": "7fdb10f8-a09d-4994-ac60-4dce1135faaa",
                     "expectedControlType": "",
@@ -228,11 +228,11 @@
                 {
                     "name": "",
                     "id": "18680069-0e1b-4c64-98c6-f9f3447bc0df",
-                    "path": "<Keyboard>/alt",
+                    "path": "<Keyboard>/tab",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "HoldLook",
+                    "action": "LookMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

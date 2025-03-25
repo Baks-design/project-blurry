@@ -7,12 +7,12 @@ namespace Assets.Scripts.Runtime.Systems.Interaction.States
     {
         readonly InteractionController controller;
 
-        public SearchState(InteractionController controller)
-        {
-            this.controller = controller;
-            Debug.Log("SaveState");
-        }
+        public SearchState(InteractionController controller) => this.controller = controller;
 
-        public void Update() => controller.CheckForInteractable();
+        public void Update()
+        {
+            Debug.Log("Search State");
+            controller.OnCheck();
+        }
     }
 }

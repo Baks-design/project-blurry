@@ -9,12 +9,12 @@ namespace Assets.Scripts.Runtime.Systems.Interaction.States
 
         public SaveState(InteractionController controller) => this.controller = controller;
 
-        public void OnEnter()
-        {
-            controller.OnSave();
-            Debug.Log("SaveState");
-        }
+        public void OnEnter() => controller.OnSave();
 
-        public void Update() => controller.UpdateSave();
+        public void Update()
+        {
+            Debug.Log("Save State");
+            controller.OnSave();
+        }
     }
 }

@@ -9,12 +9,12 @@ namespace Assets.Scripts.Runtime.Systems.Interaction.States
 
         public PickUpState(InteractionController controller) => this.controller = controller;
 
-        public void OnEnter()
-        {
-            controller.OnPickUp();
-            Debug.Log("PickUpState");
-        }
+        public void OnEnter() => controller.OnPickUp();
 
-        public void Update() => controller.UpdatePickUp();
+        public void Update()
+        {
+            Debug.Log("PickUp State");
+            controller.OnPickUp();
+        }
     }
 }
