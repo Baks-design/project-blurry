@@ -261,7 +261,7 @@ MonoBehaviour:
   leftClamp: -45
   verticalSpeedRotation: 1
   horizontalSpeedRotation: 1
-  recenterSpeed: 3
+  recenterSpeed: 5
 --- !u!1 &4925476430930493940
 GameObject:
   m_ObjectHideFlags: 0
@@ -372,7 +372,7 @@ MonoBehaviour:
   movementController: {fileID: 694196760531210215}
   inputReader: {fileID: 11400000, guid: d70c9667a15577142ade86b23bc4b13e, type: 2}
   QueueDepth: 1
-  keyPressThresholdTime: 1
+  keyPressThresholdTime: 0.5
 --- !u!114 &694196760531210215
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -386,6 +386,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _transform: {fileID: 4503421132850581505}
+  movementQueue: {fileID: 787030632906152628}
+  cameraController: {fileID: 6604573945081610361}
   collisionLayerMask:
     serializedVersion: 2
     m_Bits: 200
@@ -584,7 +586,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd4684db32d35e24ca29eb56a80fd016, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tr: {fileID: 4503421132850581505}
+  holdPosition: {fileID: 2709039429062138378}
   inputReader: {fileID: 11400000, guid: d70c9667a15577142ade86b23bc4b13e, type: 2}
   interactableLayer:
     serializedVersion: 2
@@ -703,7 +705,7 @@ Transform:
   m_GameObject: {fileID: 8260095553620463916}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.42}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -78,6 +78,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "LookInteraction",
+                    "type": "Button",
+                    "id": "b91a0ae1-b341-4596-b957-a9d9a223f7f4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Look",
                     "type": "Value",
                     "id": "6b444451-8a00-4d00-a97e-f47457f736a8",
@@ -233,6 +242,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "LookMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a71f445a-1258-474a-a0b0-c5dbff940e2e",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "LookInteraction",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

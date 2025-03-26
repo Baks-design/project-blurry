@@ -164,6 +164,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""LookInteraction"",
+                    ""type"": ""Button"",
+                    ""id"": ""b91a0ae1-b341-4596-b957-a9d9a223f7f4"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Look"",
                     ""type"": ""Value"",
                     ""id"": ""6b444451-8a00-4d00-a97e-f47457f736a8"",
@@ -319,6 +328,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""LookMode"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a71f445a-1258-474a-a0b0-c5dbff940e2e"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""LookInteraction"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -608,6 +628,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Gameplay_TurnLeft = m_Gameplay.FindAction("TurnLeft", throwIfNotFound: true);
         m_Gameplay_Crouch = m_Gameplay.FindAction("Crouch", throwIfNotFound: true);
         m_Gameplay_LookMode = m_Gameplay.FindAction("LookMode", throwIfNotFound: true);
+        m_Gameplay_LookInteraction = m_Gameplay.FindAction("LookInteraction", throwIfNotFound: true);
         m_Gameplay_Look = m_Gameplay.FindAction("Look", throwIfNotFound: true);
         m_Gameplay_PickUp = m_Gameplay.FindAction("PickUp", throwIfNotFound: true);
         m_Gameplay_Drop = m_Gameplay.FindAction("Drop", throwIfNotFound: true);
@@ -712,6 +733,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_TurnLeft;
     private readonly InputAction m_Gameplay_Crouch;
     private readonly InputAction m_Gameplay_LookMode;
+    private readonly InputAction m_Gameplay_LookInteraction;
     private readonly InputAction m_Gameplay_Look;
     private readonly InputAction m_Gameplay_PickUp;
     private readonly InputAction m_Gameplay_Drop;
@@ -759,6 +781,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Gameplay/LookMode".
         /// </summary>
         public InputAction @LookMode => m_Wrapper.m_Gameplay_LookMode;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/LookInteraction".
+        /// </summary>
+        public InputAction @LookInteraction => m_Wrapper.m_Gameplay_LookInteraction;
         /// <summary>
         /// Provides access to the underlying input action "Gameplay/Look".
         /// </summary>
@@ -825,6 +851,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @LookMode.started += instance.OnLookMode;
             @LookMode.performed += instance.OnLookMode;
             @LookMode.canceled += instance.OnLookMode;
+            @LookInteraction.started += instance.OnLookInteraction;
+            @LookInteraction.performed += instance.OnLookInteraction;
+            @LookInteraction.canceled += instance.OnLookInteraction;
             @Look.started += instance.OnLook;
             @Look.performed += instance.OnLook;
             @Look.canceled += instance.OnLook;
@@ -872,6 +901,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @LookMode.started -= instance.OnLookMode;
             @LookMode.performed -= instance.OnLookMode;
             @LookMode.canceled -= instance.OnLookMode;
+            @LookInteraction.started -= instance.OnLookInteraction;
+            @LookInteraction.performed -= instance.OnLookInteraction;
+            @LookInteraction.canceled -= instance.OnLookInteraction;
             @Look.started -= instance.OnLook;
             @Look.performed -= instance.OnLook;
             @Look.canceled -= instance.OnLook;
@@ -1177,6 +1209,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnLookMode(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "LookInteraction" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnLookInteraction(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Look" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine
 {
@@ -12,7 +13,7 @@ namespace Assets.Scripts.Runtime.Utilities.Patterns.StateMachine
         
         protected virtual void FixedUpdate() => stateMachine.FixedUpdate();
 
-        protected void At<T>(IState from, IState to, T condition) => stateMachine.AddTransition(from, to, condition);
+        protected void At<T>(IState from, IState to, Func<T> condition) => stateMachine.AddTransition(from, to, condition);
 
         protected void Any<T>(IState to, T condition) => stateMachine.AddAnyTransition(to, condition);
     }

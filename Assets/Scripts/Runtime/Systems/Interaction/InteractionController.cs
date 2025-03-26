@@ -2,8 +2,6 @@
 using UnityEngine;
 using KBCore.Refs;
 using Assets.Scripts.Runtime.Components.VFX;
-using Assets.Scripts.Runtime.Systems.EventBus;
-using Assets.Scripts.Runtime.Systems.EventBus.Events;
 using Assets.Scripts.Runtime.Systems.Interaction.States;
 using Assets.Scripts.Runtime.Utilities.Helpers;
 using Assets.Scripts.Runtime.Utilities.Patterns.ServicesLocator;
@@ -13,11 +11,11 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
 {
     public class InteractionController : StatefulEntity
     {
-        [SerializeField, Self] Transform tr;
+        [SerializeField] Transform holdPosition;
         [SerializeField, Anywhere] InputReader inputReader;
         [SerializeField] LayerMask interactableLayer;
         [SerializeField, Range(0.5f, 5f)] float rayDistance = 2f;
-        [SerializeField, Range(0.1f, 1f)] float raySphereRadius = 0.5f;
+        [SerializeField, Range(0.05f, 0.5f)] float raySphereRadius = 0.1f;
         bool pickUpInput;
         bool dropInput;
         Vector2 lookInput;
@@ -30,21 +28,19 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
         protected override void Awake()
         {
             base.Awake();
-            SetupStateMachine();
-        }
 
-        void SetupStateMachine()
-        {
-            var search = new SearchState(this);
-            var pickUp = new PickUpState(this);
-            var drop = new DropState(this);
-            var save = new SaveState(this);
+            var search = new InteractionSearchState(this);
+            var pickUp = new InteractionPickUpState(this);
+            var drop = new InteractionDropState(this);
+            var save = new InteractionSaveState(this);
 
-            At(drop, search, getPickable == null);
-            At(save, search, getPickable == null);
-            At(search, pickUp, pickUpInput && getPickable != null);
-            At(pickUp, save, pickUpInput && getPickable != null);
-            At(pickUp, drop, dropInput && getPickable != null);
+            At(search, pickUp, () => pickUpInput && getPickable != null);
+
+            At(pickUp, drop, () => dropInput);
+            At(pickUp, save, () => pickUpInput);
+
+            At(drop, search, () => true);
+            At(save, search, () => true);
 
             stateMachine.SetState(search);
         }
@@ -83,13 +79,7 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
 
         void LookInput(Vector2 input, bool _) => lookInput = input;
 
-        void PickupInput(bool input)
-        {
-            pickUpInput = input;
-            
-            if (getSomething != null)
-                getSomething.TryGetComponent(out getPickable);
-        }
+        void PickupInput(bool input) => pickUpInput = input;
 
         void DropInput(bool input) => dropInput = input;
 
@@ -101,27 +91,30 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
 
             var lastHitSomething = hitCount > 0;
             getSomething = lastHitSomething ? hits[0].transform : null;
+            if (getSomething != null)
+            {
+                getSomething.TryGetComponent(out getPickable);
+                getPickable?.OnHoverStart();
+            }
         }
 
-        public void OnPickUp()
+        public void OnInteract()
         {
             volumeService.ToggleDepthOfField(true);
-            getPickable.OnPickUp(cameraTransform.position, cameraTransform.rotation, lookInput);
+            getPickable?.OnInteract(holdPosition);
         }
 
         public void OnDrop()
         {
             volumeService.ToggleDepthOfField(false);
-            getPickable.OnDrop(tr.position);
             getPickable = null;
         }
 
         public void OnSave()
         {
             volumeService.ToggleDepthOfField(false);
-            getPickable.OnSave(tr.position);
-            getPickable = null;
             // TODO: Add to inventory
+            getPickable = null;
         }
     }
 }

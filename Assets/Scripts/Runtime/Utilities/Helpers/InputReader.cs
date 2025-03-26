@@ -18,6 +18,8 @@ namespace Assets.Scripts.Runtime.Utilities.Helpers
         public event Action MoveTurnRight = delegate { };
         public event Action MoveTurnLeft = delegate { };
         public event Action LookMode = delegate { };
+        public event Action<bool> LookInteractionDown = delegate { };
+        public event Action<bool> LookInteractionHold = delegate { };
         public event Action<Vector2, bool> Look = delegate { };
         public event Action<bool> Pickup = delegate { };
         public event Action<bool> Drop = delegate { };
@@ -85,6 +87,23 @@ namespace Assets.Scripts.Runtime.Utilities.Helpers
         {
             if (context.phase is InputActionPhase.Started)
                 MoveTurnLeft.Invoke();
+        }
+
+        public void OnLookInteraction(InputAction.CallbackContext context)
+        {
+            switch (context.phase)
+            {
+                case InputActionPhase.Started:
+                    LookInteractionDown.Invoke(true);
+                    break;
+                case InputActionPhase.Performed:
+                    LookInteractionHold.Invoke(true);
+                    break;
+                case InputActionPhase.Canceled:
+                    LookInteractionDown.Invoke(false);
+                    LookInteractionHold.Invoke(false);
+                    break;
+            }
         }
 
         public void OnLookMode(InputAction.CallbackContext context)

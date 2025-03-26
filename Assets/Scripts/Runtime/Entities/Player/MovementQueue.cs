@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Assets.Scripts.Runtime.Systems.EventBus;
-using Assets.Scripts.Runtime.Systems.EventBus.Events;
 using Assets.Scripts.Runtime.Utilities.Helpers;
 using KBCore.Refs;
 using UnityEngine;
@@ -11,19 +9,16 @@ namespace Assets.Scripts.Runtime.Entities.Player
     [RequireComponent(typeof(PlayerMovementController))]
     public class MovementQueue : MonoBehaviour
     {
-        [Header("References")]
         [SerializeField, Self] PlayerMovementController movementController;
         [SerializeField, Anywhere] InputReader inputReader;
-        [Header("Queue Settings")]
         [SerializeField, Range(1, 5)] int QueueDepth = 1;
-        [SerializeField, Range(0.5f, 5f)] float keyPressThresholdTime = 1f;
+        [SerializeField, Range(0.5f, 5f)] float keyPressThresholdTime = 0f;
         bool _isRunHold;
-        bool _isMoveValid;
         float _forwardKeyPressedTime;
-        Queue<Action> _movementQueue;
+
+        public Queue<Action> MovementQueueAction { get; private set; }
 
         public event Action OnEventIfTheCommandIsNotQueable = delegate { };
-        EventBinding<LockPlayerMovementEvent> _lockPlayerMovementEventBinding;
 
         void Awake()
         {
@@ -32,18 +27,6 @@ namespace Assets.Scripts.Runtime.Entities.Player
         }
 
         void OnEnable()
-        {
-            SubInputEvents();
-            SubBusEvents();
-        }
-
-        void OnDisable()
-        {
-            UnsubInputEvents();
-            UnsubBusEvents();
-        }
-
-        void SubInputEvents()
         {
             movementController.OnBlocked += FlushQueue;
             inputReader.MoveForward += Forward;
@@ -55,13 +38,7 @@ namespace Assets.Scripts.Runtime.Entities.Player
             inputReader.MoveTurnLeft += TurnLeft;
         }
 
-        void SubBusEvents()
-        {
-            _lockPlayerMovementEventBinding = new EventBinding<LockPlayerMovementEvent>(HandleLockPlayerMovementEvent);
-            EventBus<LockPlayerMovementEvent>.Register(_lockPlayerMovementEventBinding);
-        }
-
-        void UnsubInputEvents()
+        void OnDisable()
         {
             movementController.OnBlocked -= FlushQueue;
             inputReader.MoveForward -= Forward;
@@ -71,14 +48,6 @@ namespace Assets.Scripts.Runtime.Entities.Player
             inputReader.MoveStrafeLeft -= StrafeLeft;
             inputReader.MoveTurnRight -= TurnRight;
             inputReader.MoveTurnLeft -= TurnLeft;
-        }
-
-        void UnsubBusEvents() => EventBus<LockPlayerMovementEvent>.Deregister(_lockPlayerMovementEventBinding);
-
-        void HandleLockPlayerMovementEvent(LockPlayerMovementEvent ev)
-        {
-            _isMoveValid = ev.isMoveValid;
-            _movementQueue.Clear();
         }
 
         void RunForward(bool isRun) => _isRunHold = isRun;
@@ -96,12 +65,11 @@ namespace Assets.Scripts.Runtime.Entities.Player
             ResetKeyPressTimer();
         }
 
-        void InitQueue() => _movementQueue = new Queue<Action>(QueueDepth);
+        void InitQueue() => MovementQueueAction = new Queue<Action>(QueueDepth);
 
         void InitVars()
         {
             _isRunHold = false;
-            _isMoveValid = true;
             _forwardKeyPressedTime = 0f;
         }
 
@@ -114,16 +82,16 @@ namespace Assets.Scripts.Runtime.Entities.Player
         void MovementHandle()
         {
             // Skip if movement is not valid or the player is not stationary
-            if (!_isMoveValid || !movementController.IsStationary || _movementQueue.Count <= 0) return;
+            if (!movementController.IsMoveValid || !movementController.IsStationary || MovementQueueAction.Count <= 0) return;
 
             // Execute the next movement command in the queue
-            var action = _movementQueue.Dequeue();
+            var action = MovementQueueAction.Dequeue();
             action?.Invoke();
         }
 
         void RunMovementHandle()
         {
-            if (!_isMoveValid) return;
+            if (!movementController.IsMoveValid) return;
 
             if (_isRunHold)
                 RunForward();
@@ -137,7 +105,7 @@ namespace Assets.Scripts.Runtime.Entities.Player
             _forwardKeyPressedTime += Time.deltaTime;
 
             // If the threshold is reached and the queue has space, switch to running and queue a forward movement
-            if (_forwardKeyPressedTime >= keyPressThresholdTime && _movementQueue.Count < QueueDepth)
+            if (_forwardKeyPressedTime >= keyPressThresholdTime && MovementQueueAction.Count < QueueDepth)
             {
                 movementController.SwitchToRunning();
                 QueueCommand(() => movementController.MoveForward());
@@ -147,14 +115,14 @@ namespace Assets.Scripts.Runtime.Entities.Player
         void QueueCommand(Action action)
         {
             // If the queue is full, trigger the event and skip adding the command
-            if (_movementQueue.Count >= QueueDepth)
+            if (MovementQueueAction.Count >= QueueDepth)
             {
                 OnEventIfTheCommandIsNotQueable.Invoke();
                 return;
             }
 
             // Add the command to the queue
-            _movementQueue.Enqueue(action);
+            MovementQueueAction.Enqueue(action);
         }
 
         void StopRunForward()
@@ -169,7 +137,7 @@ namespace Assets.Scripts.Runtime.Entities.Player
         {
             // Reset the queue and switch back to walking
             ResetKeyPressTimer();
-            _movementQueue.Clear();
+            MovementQueueAction.Clear();
             movementController.SwitchToWalking();
         }
 

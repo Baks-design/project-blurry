@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 2339899835403635935}
   - component: {fileID: 4297748290768235680}
   - component: {fileID: 3036278782490585752}
-  - component: {fileID: 2524294744690609439}
   - component: {fileID: 2270358893030882016}
+  - component: {fileID: 7117496473555414204}
   m_Layer: 7
   m_Name: Pickable
   m_TagString: Untagged
@@ -111,28 +111,11 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!114 &2524294744690609439
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1105610039170559879}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a40bfdc1df909c943bf86057dc5bd51e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tr: {fileID: 391726499709639378}
-  coll: {fileID: 2270358893030882016}
-  distanceFromCamera: 3
-  positionSpeed: 2
-  rotationSpeed: 2
+  m_CollisionDetection: 1
 --- !u!65 &2270358893030882016
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -154,3 +137,118 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7117496473555414204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1105610039170559879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9687a882e0fe7a64291c0904fd604b51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tr: {fileID: 391726499709639378}
+  rb: {fileID: 3036278782490585752}
+  rend: {fileID: 4297748290768235680}
+  targetColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  canReturn: 1
+  input: {fileID: 11400000, guid: d70c9667a15577142ade86b23bc4b13e, type: 2}
+  sensitivity: 5
+  throwSpeed: 200
+  velocityClipSplit: 5
+  pickupData:
+    clip: {fileID: 8300000, guid: 1ac17db49ff497c4eb25475e3de8f0fa, type: 3}
+    mixerGroup: {fileID: 4796280562796518393, guid: 0648aff6a08d3f0468df28399773aba6, type: 2}
+    loop: 0
+    playOnAwake: 0
+    frequentSound: 0
+    mute: 0
+    bypassEffects: 0
+    bypassListenerEffects: 0
+    bypassReverbZones: 0
+    priority: 128
+    volume: 1
+    pitch: 1
+    panStereo: 0
+    spatialBlend: 0
+    reverbZoneMix: 1
+    dopplerLevel: 1
+    spread: 0
+    minDistance: 1
+    maxDistance: 500
+    ignoreListenerVolume: 0
+    ignoreListenerPause: 0
+    rolloffMode: 0
+  throwData:
+    clip: {fileID: 8300000, guid: 39710d2f557d27e4d89996f83a12932f, type: 3}
+    mixerGroup: {fileID: 4796280562796518393, guid: 0648aff6a08d3f0468df28399773aba6, type: 2}
+    loop: 0
+    playOnAwake: 0
+    frequentSound: 0
+    mute: 0
+    bypassEffects: 0
+    bypassListenerEffects: 0
+    bypassReverbZones: 0
+    priority: 128
+    volume: 1
+    pitch: 1
+    panStereo: 0
+    spatialBlend: 0
+    reverbZoneMix: 1
+    dopplerLevel: 1
+    spread: 0
+    minDistance: 1
+    maxDistance: 500
+    ignoreListenerVolume: 0
+    ignoreListenerPause: 0
+    rolloffMode: 0
+  crashsoftData:
+    clip: {fileID: 8300000, guid: 21426eb5524905d4a958b124c3ccce6e, type: 3}
+    mixerGroup: {fileID: 4796280562796518393, guid: 0648aff6a08d3f0468df28399773aba6, type: 2}
+    loop: 0
+    playOnAwake: 0
+    frequentSound: 0
+    mute: 0
+    bypassEffects: 0
+    bypassListenerEffects: 0
+    bypassReverbZones: 0
+    priority: 128
+    volume: 1
+    pitch: 1
+    panStereo: 0
+    spatialBlend: 0
+    reverbZoneMix: 1
+    dopplerLevel: 1
+    spread: 0
+    minDistance: 1
+    maxDistance: 500
+    ignoreListenerVolume: 0
+    ignoreListenerPause: 0
+    rolloffMode: 0
+  crashhardData:
+    clip: {fileID: 8300000, guid: 8d290129b460ad74994ddea3ad3a4477, type: 3}
+    mixerGroup: {fileID: 4796280562796518393, guid: 0648aff6a08d3f0468df28399773aba6, type: 2}
+    loop: 0
+    playOnAwake: 0
+    frequentSound: 0
+    mute: 0
+    bypassEffects: 0
+    bypassListenerEffects: 0
+    bypassReverbZones: 0
+    priority: 128
+    volume: 1
+    pitch: 1
+    panStereo: 0
+    spatialBlend: 0
+    reverbZoneMix: 1
+    dopplerLevel: 1
+    spread: 0
+    minDistance: 1
+    maxDistance: 500
+    ignoreListenerVolume: 0
+    ignoreListenerPause: 0
+    rolloffMode: 0
+  hoverPrompt: Grab Object
+  interactPrompt: 

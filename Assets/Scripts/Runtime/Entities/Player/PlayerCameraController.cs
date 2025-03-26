@@ -21,30 +21,32 @@ namespace Assets.Scripts.Runtime.Entities.Player
         [SerializeField, Range(0f, 5f)] float verticalSpeedRotation = 1f;
         [SerializeField, Range(0f, 5f)] float horizontalSpeedRotation = 1f;
         [SerializeField, Range(0f, 5f)] float recenterSpeed = 3f;
-        bool _isHoldKey;
         bool _isCurrentDeviceMouse;
         float _cinemachineTargetPitch;
         float _cinemachineTargetYaw;
         Vector2 _lookInput;
         Quaternion _targetRotation;
 
+        public bool IsEnabledCamera { get; private set; }
+
+        EventBinding<CameraMovementEvent> cameraMovementEventBinding;
+
         void OnEnable()
         {
-            input.LookMode += OnEnableControlCamera;
             input.Look += OnLook;
+            input.LookMode += OnEnableControlCamera;
+            cameraMovementEventBinding = new EventBinding<CameraMovementEvent>(HandleCameraMovementEvent);
+            EventBus<CameraMovementEvent>.Register(cameraMovementEventBinding);
         }
 
         void OnDisable()
         {
-            input.LookMode -= OnEnableControlCamera;
             input.Look -= OnLook;
+            input.LookMode -= OnEnableControlCamera;
+            EventBus<CameraMovementEvent>.Deregister(cameraMovementEventBinding);
         }
 
-        void OnEnableControlCamera()
-        {
-            _isHoldKey = !_isHoldKey;
-            EventBus<LockPlayerMovementEvent>.Raise(new LockPlayerMovementEvent { isMoveValid = !_isHoldKey });
-        }
+        void OnEnableControlCamera() => IsEnabledCamera = !IsEnabledCamera;
 
         void OnLook(Vector2 look, bool isDeviceMouse)
         {
@@ -52,9 +54,11 @@ namespace Assets.Scripts.Runtime.Entities.Player
             _isCurrentDeviceMouse = isDeviceMouse;
         }
 
+        void HandleCameraMovementEvent(CameraMovementEvent cameraEvent) => IsEnabledCamera = cameraEvent.isLookValid;
+
         void Start()
         {
-            _isHoldKey = false;
+            IsEnabledCamera = false;
             _isCurrentDeviceMouse = false;
             _targetRotation = target.transform.localRotation;
             _cinemachineTargetPitch = _targetRotation.eulerAngles.x;
@@ -69,7 +73,7 @@ namespace Assets.Scripts.Runtime.Entities.Player
 
         void MovementRotation()
         {
-            if (!_isHoldKey || _lookInput.sqrMagnitude < 0.01f) return;
+            if (!IsEnabledCamera || _lookInput.sqrMagnitude < 0.01f) return;
 
             var deltaTimeMultiplier = _isCurrentDeviceMouse ? 1f : Time.deltaTime;
 
@@ -84,7 +88,7 @@ namespace Assets.Scripts.Runtime.Entities.Player
 
         void HandleRecenter()
         {
-            if (_isHoldKey) return;
+            if (IsEnabledCamera) return;
 
             target.transform.localRotation = Quaternion.Slerp(
                 target.transform.localRotation, _targetRotation, recenterSpeed * Time.deltaTime);

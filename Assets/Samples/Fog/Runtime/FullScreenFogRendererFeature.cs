@@ -334,7 +334,7 @@ namespace Meryuhi.Rendering
                 Material = _material,
                 Fog = fog,
             });
-            //TODO: maybe we do not need color input
+            
             _renderPass.ConfigureInput(ScriptableRenderPassInput.Color | ScriptableRenderPassInput.Depth);
 
             _renderPass.requiresIntermediateTexture = true;
