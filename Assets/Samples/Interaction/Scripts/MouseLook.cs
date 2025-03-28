@@ -38,7 +38,7 @@ public class MouseLook : MonoBehaviour
 
     public static float ClampAngle(float angle, float min, float max)
     {
-        angle = angle % 360;
+        angle %= 360;
         if ((angle >= -360F) && (angle <= 360F))
         {
             if (angle < -360F)

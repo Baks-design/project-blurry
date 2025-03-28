@@ -10,6 +10,7 @@ namespace Assets.Scripts.Runtime.Utilities.Helpers
     {
         public InputSystem_Actions inputActions;
 
+        //Move
         public event Action MoveForward = delegate { };
         public event Action<bool> MoveRunForward = delegate { };
         public event Action MoveBackward = delegate { };
@@ -17,13 +18,21 @@ namespace Assets.Scripts.Runtime.Utilities.Helpers
         public event Action MoveStrafeLeft = delegate { };
         public event Action MoveTurnRight = delegate { };
         public event Action MoveTurnLeft = delegate { };
+        public event Action Crouch = delegate { };
+
+        //Look
+        public event Action<Vector2, bool> Look = delegate { };
         public event Action LookMode = delegate { };
         public event Action<bool> LookInteractionDown = delegate { };
         public event Action<bool> LookInteractionHold = delegate { };
-        public event Action<Vector2, bool> Look = delegate { };
+        public event Action SquintDown = delegate { };
+        public event Action<bool> SquintHold = delegate { };
+
+        //Actions
         public event Action<bool> Pickup = delegate { };
         public event Action<bool> Drop = delegate { };
-        public event Action Crouch = delegate { };
+
+        //UI
         public event Action OpenMenu = delegate { };
         public event Action CloseMenu = delegate { };
 
@@ -106,6 +115,19 @@ namespace Assets.Scripts.Runtime.Utilities.Helpers
             }
         }
 
+        public void OnSquint(InputAction.CallbackContext context)
+        {
+            switch (context.phase)
+            {
+                case InputActionPhase.Performed:
+                    SquintHold.Invoke(true);
+                    break;
+                case InputActionPhase.Canceled:
+                    SquintHold.Invoke(false);
+                    break;
+            }
+        }
+
         public void OnLookMode(InputAction.CallbackContext context)
         {
             if (context.phase is InputActionPhase.Started)
@@ -160,6 +182,15 @@ namespace Assets.Scripts.Runtime.Utilities.Helpers
         #region Misc
         public void SetCursorLockState(bool isLocked)
         => Cursor.lockState = isLocked ? CursorLockMode.Locked : CursorLockMode.None;
+
+        public static void SetCursorState(bool lockCursor)
+        {
+#if UNITY_STANDALONE
+            Cursor.lockState = lockCursor ? CursorLockMode.Locked : CursorLockMode.None;
+#elif UNITY_EDITOR
+            Cursor.lockState = lockCursor ? CursorLockMode.Confined : CursorLockMode.None;
+#endif
+        }
         #endregion
     }
 }

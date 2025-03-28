@@ -1,4 +1,4 @@
-using Assets.Scripts.Runtime.Systems.Inventory.Helpers;
+using Assets.Scripts.Runtime.Utilities.Helpers;
 
 namespace Assets.Scripts.Runtime.Systems.Persistence
 {

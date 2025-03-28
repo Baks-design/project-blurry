@@ -12,7 +12,7 @@ namespace Assets.Scripts.Runtime.Components.Gameplay
         TagHandle playerTagHandle;
         ISceneLoaderService sceneLoaderService;
 
-        void Awake()
+        void Start()
         {
             playerTagHandle = TagHandle.GetExistingTag(GameTags.PlayerTag);
             ServiceLocator.Global.Get(out sceneLoaderService);

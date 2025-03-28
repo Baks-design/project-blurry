@@ -10,7 +10,7 @@ namespace Assets.Scripts.Runtime.Components.Gameplay
         TagHandle playerTagHandle;
         readonly GameData gameData;
 
-        void Awake()
+        void Start()
         {
             dataService = new FileDataService(new JsonSerializer());
             playerTagHandle = TagHandle.GetExistingTag(GameTags.PlayerTag);

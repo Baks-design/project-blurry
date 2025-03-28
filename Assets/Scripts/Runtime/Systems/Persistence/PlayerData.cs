@@ -1,5 +1,5 @@
 using System;
-using Assets.Scripts.Runtime.Systems.Inventory.Helpers;
+using Assets.Scripts.Runtime.Utilities.Helpers;
 using UnityEngine;
 
 namespace Assets.Scripts.Runtime.Systems.Persistence

@@ -518,6 +518,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8022067644277484074}
+  - component: {fileID: 8970232845145371373}
   m_Layer: 0
   m_Name: Effect Root
   m_TagString: Untagged
@@ -541,6 +542,34 @@ Transform:
   - {fileID: 6081911597801654162}
   m_Father: {fileID: 4503421132850581505}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8970232845145371373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6750886585211303661}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f02b632154d22964c96dab9936ff0757, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tr: {fileID: 8022067644277484074}
+  cinemachine: {fileID: 4948487780305017219}
+  input: {fileID: 11400000, guid: d70c9667a15577142ade86b23bc4b13e, type: 2}
+  sphereCastRadius: 0.1
+  changeFov: 45
+  defaultFov: 60
+  toggle: 0
+  working: 1
+  focusQuality: 0
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 127
+  maxDistance: 100
+  interpolateFocus: 1
+  interpolationTime: 0.1
+  ignoreDOP: 0
 --- !u!1 &7747137713677760205
 GameObject:
   m_ObjectHideFlags: 0
@@ -592,7 +621,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   rayDistance: 2
-  raySphereRadius: 0.5
+  raySphereRadius: 0.1
 --- !u!1 &8134348382694743029
 GameObject:
   m_ObjectHideFlags: 0
@@ -619,7 +648,7 @@ Transform:
   m_GameObject: {fileID: 8134348382694743029}
   serializedVersion: 2
   m_LocalRotation: {x: -0.5, y: -0.5, z: 0.5, w: -0.5}
-  m_LocalPosition: {x: -3.6200013, y: 0.1, z: -0.14999962}
+  m_LocalPosition: {x: 0, y: 0.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

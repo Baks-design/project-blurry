@@ -12,15 +12,18 @@ namespace Assets.Scripts.Runtime.Entities.Player
         [Header("Input Settings")]
         [SerializeField, Anywhere] InputReader input;
         [SerializeField, Anywhere] GameObject target;
+
         [Header("Rotation Clamps")]
         [SerializeField, Range(0f, 90f)] float topClamp = 45f;
         [SerializeField, Range(0f, -90f)] float bottomClamp = -45f;
         [SerializeField, Range(0f, 90f)] float rightClamp = 45f;
         [SerializeField, Range(0f, -90f)] float leftClamp = -45f;
+
         [Header("Rotation Speeds")]
         [SerializeField, Range(0f, 5f)] float verticalSpeedRotation = 1f;
         [SerializeField, Range(0f, 5f)] float horizontalSpeedRotation = 1f;
         [SerializeField, Range(0f, 5f)] float recenterSpeed = 3f;
+        
         bool _isCurrentDeviceMouse;
         float _cinemachineTargetPitch;
         float _cinemachineTargetYaw;
@@ -80,10 +83,23 @@ namespace Assets.Scripts.Runtime.Entities.Player
             _cinemachineTargetPitch += _lookInput.y * verticalSpeedRotation * deltaTimeMultiplier;
             _cinemachineTargetYaw += _lookInput.x * horizontalSpeedRotation * deltaTimeMultiplier;
 
-            _cinemachineTargetPitch = Mathf.Clamp(_cinemachineTargetPitch, bottomClamp, topClamp);
-            _cinemachineTargetYaw = Mathf.Clamp(_cinemachineTargetYaw, leftClamp, rightClamp);
+            _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, bottomClamp, topClamp);
+            _cinemachineTargetYaw = ClampAngle(_cinemachineTargetYaw, leftClamp, rightClamp);
 
             target.transform.localRotation = Quaternion.Euler(_cinemachineTargetPitch, _cinemachineTargetYaw, 0f);
+        }
+
+        public static float ClampAngle(float angle, float min, float max)
+        {
+            angle %= 360;
+            if ((angle >= -360f) && (angle <= 360f))
+            {
+                if (angle < -360f)
+                    angle += 360f;
+                if (angle > 360f)
+                    angle -= 360f;
+            }
+            return Mathf.Clamp(angle, min, max);
         }
 
         void HandleRecenter()

@@ -47,7 +47,7 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
         bool muteCollisionSound = true;
         bool lookInteractionDown;
         bool lookInteractionHold;
-        Vector2 look;
+        Vector2 lookInput;
         Vector3 originPosition;
         Transform mainCameraTransform;
         Quaternion currentRotation;
@@ -58,9 +58,8 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
 
         void Awake()
         {
-            originColor = rend.material.color;
+            originColor = rend.sharedMaterial.color;
             mainCameraTransform = Camera.main.transform;
-            ServiceLocator.Global.Get(out soundService);
             _soundBuilder = soundService.CreateSoundBuilder();
         }
 
@@ -78,22 +77,37 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
             input.LookInteractionHold -= OnLookInteractionHold;
         }
 
-        void OnLook(Vector2 value, bool _) => look = value;
+        void OnLook(Vector2 value, bool _) => lookInput = value;
 
         void OnLookInteractionDown(bool isValue) => lookInteractionDown = isValue;
 
         void OnLookInteractionHold(bool isValue) => lookInteractionHold = isValue;
 
-        void Start() => StartCoroutine(SetOriginTransform());
+        void Start()
+        {
+            ServiceLocator.Global.Get(out soundService);
+            StartCoroutine(SetOriginTransform());
+            //await SetOriginTransform();
+        }
 
         IEnumerator SetOriginTransform()
         {
-            yield return WaitFor.Seconds(0.25f);
+            yield return new WaitForSeconds(0.25f);
             originPosition = tr.position;
             originRotation = tr.rotation;
-            yield return WaitFor.Seconds(0.75f);
+            yield return new WaitForSeconds(0.75f);
             muteCollisionSound = false;
         }
+
+        // async Awaitable SetOriginTransform()
+        // {
+        //     await Awaitable.WaitForSecondsAsync(0.25f); // First delay
+        //     originPosition = tr.position;
+        //     originRotation = tr.rotation;
+
+        //     await Awaitable.WaitForSecondsAsync(0.75f); // Second delay
+        //     muteCollisionSound = false;
+        // }
 
         void FixedUpdate() => HandleObjectHoverEffect();
 
@@ -138,8 +152,8 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
             var objectRelativeUp = tr.InverseTransformDirection(relativeUp);
             var objectRelativeRight = tr.InverseTransformDirection(relativeRight);
 
-            var rotateLeft = Quaternion.AngleAxis(-look.x * sensitivity / tr.localScale.x * sensitivity, objectRelativeUp);
-            var rotateRight = Quaternion.AngleAxis(look.y * sensitivity / tr.localScale.x * sensitivity, objectRelativeRight);
+            var rotateLeft = Quaternion.AngleAxis(-lookInput.x * sensitivity / tr.localScale.x * sensitivity, objectRelativeUp);
+            var rotateRight = Quaternion.AngleAxis(lookInput.y * sensitivity / tr.localScale.x * sensitivity, objectRelativeRight);
 
             currentRotation = rotateLeft * rotateRight;
 
@@ -178,6 +192,7 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
             isHovered = true;
 
             StartCoroutine(ResetHoverAfterDelay());
+            //await ResetHoverAfterDelay();
 
             if (!isCarried)
                 EventBus<InteractObjectNameEvent>.Raise(new InteractObjectNameEvent { objectName = hoverPrompt });
@@ -185,9 +200,15 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
 
         IEnumerator ResetHoverAfterDelay()
         {
-            yield return WaitFor.Seconds(1f);
+            yield return new WaitForSeconds(1f);
             isHovered = false;
         }
+
+        // async Awaitable ResetHoverAfterDelay()
+        // {
+        //     await Awaitable.WaitForSecondsAsync(1f); 
+        //     isHovered = false;
+        // }
         #endregion
 
         #region Interaction

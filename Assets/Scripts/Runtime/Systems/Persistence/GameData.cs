@@ -1,5 +1,5 @@
 using System;
-using Assets.Scripts.Runtime.Systems.Inventory;
+//using Assets.Scripts.Runtime.Systems.Inventory;
 
 namespace Assets.Scripts.Runtime.Systems.Persistence
 {
@@ -9,6 +9,6 @@ namespace Assets.Scripts.Runtime.Systems.Persistence
         public string Name;
         public string CurrentLevelName;
         public PlayerData playerData;
-        public InventoryData inventoryData;
+        //public InventoryData inventoryData;
     }
 }

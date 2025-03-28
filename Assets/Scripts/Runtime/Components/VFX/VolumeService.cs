@@ -10,19 +10,20 @@ namespace Assets.Scripts.Runtime.Components.VFX
     public class VolumeService : MonoBehaviour, IVolumeService
     {
         [SerializeField, Child] Volume globalVolume;
+        DepthOfField depthOfField;
+        Vignette vignette;
+
+        public DepthOfField DepthOfField => depthOfField;
+        public Vignette Vignette => vignette;
 
         void Awake()
         {
             DontDestroyOnLoad(this);
-            ServiceLocator.Global.Register<IVolumeService>(this);
-        }
 
-        public void ToggleDepthOfField(bool enable)
-        {
-            if (globalVolume.profile.TryGet(out DepthOfField depthOfField))
-                depthOfField.active = enable;
-            else
-                Assert.IsNull(depthOfField, "DepthOfField effect not found in the Volume profile.");
+            ServiceLocator.Global.Register<IVolumeService>(this);
+
+            globalVolume.profile.TryGet(out depthOfField);
+            globalVolume.profile.TryGet(out vignette);
         }
     }
 }

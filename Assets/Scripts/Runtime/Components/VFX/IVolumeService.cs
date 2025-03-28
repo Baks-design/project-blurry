@@ -1,7 +1,10 @@
+using UnityEngine.Rendering.Universal;
+
 namespace Assets.Scripts.Runtime.Components.VFX
 {
     public interface IVolumeService
     {
-        void ToggleDepthOfField(bool enable);
+        DepthOfField DepthOfField { get; }
+        Vignette Vignette { get; }
     }
 }

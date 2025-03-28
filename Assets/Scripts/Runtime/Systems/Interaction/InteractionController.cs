@@ -18,12 +18,10 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
         [SerializeField, Range(0.05f, 0.5f)] float raySphereRadius = 0.1f;
         bool pickUpInput;
         bool dropInput;
-        Vector2 lookInput;
         Transform cameraTransform;
         Transform getSomething;
         RaycastHit[] hits;
         IPickable getPickable;
-        IVolumeService volumeService;
 
         protected override void Awake()
         {
@@ -47,17 +45,8 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
 
         void Start()
         {
-            GetServices();
-            InitVars();
-        }
-
-        void GetServices() => ServiceLocator.Global.Get(out volumeService);
-
-        void InitVars()
-        {
             pickUpInput = false;
             dropInput = false;
-            lookInput = Vector2.zero;
             cameraTransform = Camera.main.transform;
             getSomething = null;
             hits = new RaycastHit[1];
@@ -65,19 +54,15 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
 
         void OnEnable()
         {
-            inputReader.Look += LookInput;
             inputReader.Pickup += PickupInput;
             inputReader.Drop += DropInput;
         }
 
         void OnDisable()
         {
-            inputReader.Look -= LookInput;
             inputReader.Pickup -= PickupInput;
             inputReader.Drop -= DropInput;
         }
-
-        void LookInput(Vector2 input, bool _) => lookInput = input;
 
         void PickupInput(bool input) => pickUpInput = input;
 
@@ -98,21 +83,12 @@ namespace Assets.Scripts.Runtime.Systems.Interaction
             }
         }
 
-        public void OnInteract()
-        {
-            volumeService.ToggleDepthOfField(true);
-            getPickable?.OnInteract(holdPosition);
-        }
+        public void OnInteract() => getPickable?.OnInteract(holdPosition);
 
-        public void OnDrop()
-        {
-            volumeService.ToggleDepthOfField(false);
-            getPickable = null;
-        }
+        public void OnDrop() => getPickable = null;
 
         public void OnSave()
         {
-            volumeService.ToggleDepthOfField(false);
             // TODO: Add to inventory
             getPickable = null;
         }

@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.RenderGraphModule;
 using UnityEngine.Rendering.Universal;
 
-namespace Meryuhi.Rendering
+namespace Assets.Samples.Fog.Runtime
 {
     [Tooltip(FullScreenFog.Name + " will process the related volume overrides in scenes.")]
     public sealed class FullScreenFogRendererFeature : ScriptableRendererFeature
@@ -19,53 +19,45 @@ namespace Meryuhi.Rendering
 
         class FullScreenFogRenderPass : ScriptableRenderPass
         {
-            private PassData _passData;
-            private RTHandle _copiedColor;
+            PassData _passData;
+            RTHandle _copiedColor;
 
-            private static readonly int BlitTextureShaderID = Shader.PropertyToID("_BlitTexture");
-            private static readonly int BlitScaleBias = Shader.PropertyToID("_BlitScaleBias");
+            static readonly int BlitTextureShaderID = Shader.PropertyToID("_BlitTexture");
+            static readonly int BlitScaleBias = Shader.PropertyToID("_BlitScaleBias");
 
-            private static readonly (string Name, FullScreenFogDensityMode Value)[] ModeShaderKeywords = Enum.GetValues(typeof(FullScreenFogDensityMode))
+            static readonly (string Name, FullScreenFogDensityMode Value)[] ModeShaderKeywords = Enum.GetValues(typeof(FullScreenFogDensityMode))
                 .Cast<FullScreenFogDensityMode>()
                 .Select(mode => ($"_{nameof(FullScreenFog.densityMode).ToUpper()}_{mode.ToString().ToUpper()}", mode)).ToArray();
-
-            private static readonly (string Name, FullScreenFogMode Value)[] DistanceModeShaderKeywords = Enum.GetValues(typeof(FullScreenFogMode))
+            static readonly (string Name, FullScreenFogMode Value)[] DistanceModeShaderKeywords = Enum.GetValues(typeof(FullScreenFogMode))
                 .Cast<FullScreenFogMode>()
                 .Select(mode => ($"_{nameof(FullScreenFog.mode).ToUpper()}_{mode.ToString().ToUpper()}", mode)).ToArray();
-            private static readonly int MainParamsShaderID = Shader.PropertyToID("_MainParams");
+            static readonly int MainParamsShaderID = Shader.PropertyToID("_MainParams");
 
-            private static readonly (string Name, FullScreenFogNoiseMode Value)[] NoiseModeShaderKeywords = Enum.GetValues(typeof(FullScreenFogNoiseMode))
+            static readonly (string Name, FullScreenFogNoiseMode Value)[] NoiseModeShaderKeywords = Enum.GetValues(typeof(FullScreenFogNoiseMode))
                 .Cast<FullScreenFogNoiseMode>()
                 .Select(mode => ($"_{nameof(FullScreenFog.noiseMode).ToUpper()}_{mode.ToString().ToUpper()}", mode)).ToArray();
-            private static readonly int NoiseTexShaderID = Shader.PropertyToID("_NoiseTex");
-            private static readonly int NoiseParamsShaderID = Shader.PropertyToID("_NoiseParams");
-            private static readonly string CopiedColorRTName = $"_{FullScreenFog.Name}CopiedColor";
-            private static readonly string CopyColorPassName = $"{FullScreenFog.Name}CopyColorPass";
-            private static readonly string MainPassName = $"{FullScreenFog.Name}MainPass";
 
-            public FullScreenFogRenderPass()
-            {
-                profilingSampler = new(FullScreenFog.Name);
-            }
+            static readonly int NoiseTexShaderID = Shader.PropertyToID("_NoiseTex");
+            static readonly int NoiseParamsShaderID = Shader.PropertyToID("_NoiseParams");
+            static readonly string CopiedColorRTName = $"_{FullScreenFog.Name}CopiedColor";
+            static readonly string CopyColorPassName = $"{FullScreenFog.Name}CopyColorPass";
+            static readonly string MainPassName = $"{FullScreenFog.Name}MainPass";
 
-            public void Setup(PassData passData)
-            {
-                _passData = passData;
-            }
+            public FullScreenFogRenderPass() => profilingSampler = new(FullScreenFog.Name);
+
+            public void Setup(PassData passData) => _passData = passData;
 
             ///From <see cref="FullScreenPassRendererFeature.FullScreenRenderPass"/>
             [Obsolete]
             public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
             {
                 // Disable obsolete warning for internal usage
-                #pragma warning disable CS0618
                 // FullScreenPass manages its own RenderTarget.
                 // ResetTarget here so that ScriptableRenderer's active attachement can be invalidated when processing this ScriptableRenderPass.
                 ResetTarget();
-                #pragma warning restore CS0618
                 ReAllocate(renderingData.cameraData.cameraTargetDescriptor);
             }
-            
+
             internal void ReAllocate(RenderTextureDescriptor desc)
             {
                 desc.msaaSamples = 1;
@@ -73,76 +65,59 @@ namespace Meryuhi.Rendering
                 RenderingUtils.ReAllocateHandleIfNeeded(ref _copiedColor, desc, name: CopiedColorRTName);
             }
 
-            public void Dispose()
-            {
-                _copiedColor?.Release();
-            }
+            public void Dispose() => _copiedColor?.Release();
 
-            private static void ExecuteCopyColorPass(RasterCommandBuffer cmd, RTHandle sourceTexture)
-            {
-                Blitter.BlitTexture(cmd, sourceTexture, new Vector4(1, 1, 0, 0), 0.0f, false);
-            }
+            static void ExecuteCopyColorPass(RasterCommandBuffer cmd, RTHandle sourceTexture)
+            => Blitter.BlitTexture(cmd, sourceTexture, new Vector4(1, 1, 0, 0), 0.0f, false);
 
-            private static void ExecuteMainPass(RasterCommandBuffer cmd, RTHandle sourceTexture, Material material, FullScreenFog fog)
+            static void ExecuteMainPass(RasterCommandBuffer cmd, RTHandle sourceTexture, Material material, FullScreenFog fog)
             {
                 var mode = fog.mode.value;
                 foreach (var (Name, Value) in DistanceModeShaderKeywords)
-                {
                     CoreUtils.SetKeyword(material, Name, Value == mode);
-                }
+
                 var color = fog.color.value;
                 color.a = fog.intensity.value;
                 material.color = color;
 
                 var densityMode = fog.densityMode.value;
                 foreach (var (Name, Value) in ModeShaderKeywords)
-                {
                     CoreUtils.SetKeyword(material, Name, Value == densityMode);
-                }
 
                 var fogParams = new Vector4();
                 if (FullScreenFog.UseStartLine(mode))
-                {
                     fogParams.x = fog.startLine.value;
-                }
                 if (FullScreenFog.UseEndLine(mode, densityMode))
                 {
                     var delta = fog.endLine.value - fogParams.x;
-                    fogParams.y = delta == 0 ? float.MaxValue : 1 / delta;
+                    fogParams.y = delta == 0f ? float.MaxValue : 1f / delta;
                 }
                 var isHeightMode = FullScreenFog.UseStartHeight(mode);
                 if (isHeightMode)
-                {
                     fogParams.x = fog.startHeight.value;
-                }
                 if (FullScreenFog.UseEndHeight(mode, densityMode))
                 {
                     var delta = fogParams.x - fog.endHeight.value;
-                    fogParams.y = delta == 0 ? float.MaxValue : 1 / delta;
+                    fogParams.y = delta == 0f ? float.MaxValue : 1 / delta;
                 }
                 if (FullScreenFog.UseIntensity(densityMode))
-                {
                     fogParams.y = fog.density.value;
-                }
                 if (isHeightMode)/*Because the height fog calculation direction is reversed, we need to reverse the sign*/
-                {
-                    fogParams.y *= -1;
-                }
+                    fogParams.y *= -1f;
+
                 material.SetVector(MainParamsShaderID, fogParams);
 
                 foreach (var (Name, Value) in NoiseModeShaderKeywords)
-                {
                     CoreUtils.SetKeyword(material, Name, Value == fog.noiseMode.value);
-                }
+
                 var noiseMode = fog.noiseMode.value;
                 if (FullScreenFog.UseNoiseTex(noiseMode))
-                {
                     material.SetTexture(NoiseTexShaderID, fog.noiseTexture.value == null ? Texture2D.whiteTexture : fog.noiseTexture.value);
-                }
+
                 if (FullScreenFog.UseNoiseIntensity(noiseMode))
-                {
-                    material.SetVector(NoiseParamsShaderID, new Vector4(fog.noiseIntensity.value, fog.noiseScale.value, fog.noiseScrollSpeed.value.x, fog.noiseScrollSpeed.value.y));
-                }
+                    material.SetVector(NoiseParamsShaderID, new Vector4(
+                        fog.noiseIntensity.value, fog.noiseScale.value, fog.noiseScrollSpeed.value.x, fog.noiseScrollSpeed.value.y));
+
                 material.SetTexture(BlitTextureShaderID, sourceTexture);
                 // We need to set the "_BlitScaleBias" uniform for user materials with shaders relying on core Blit.hlsl to work
                 material.SetVector(BlitScaleBias, new Vector4(1, 1, 0, 0));
@@ -184,7 +159,7 @@ namespace Meryuhi.Rendering
 
                 source = resourcesData.activeColorTexture;
                 destination = renderGraph.CreateTexture(targetDesc);
-                
+
                 using (var builder = renderGraph.AddRasterRenderPass<CopyPassData>(CopyColorPassName, out var passData, profilingSampler))
                 {
                     passData.InputTexture = source;
@@ -206,21 +181,18 @@ namespace Meryuhi.Rendering
                 using (var builder = renderGraph.AddRasterRenderPass<MainPassData>(MainPassName, out var passData, profilingSampler))
                 {
                     passData.Material = _passData.Material;
-
                     passData.Fog = _passData.Fog;
-
                     passData.InputTexture = source;
 
-                    if(passData.InputTexture.IsValid())
+                    if (passData.InputTexture.IsValid())
                         builder.UseTexture(passData.InputTexture, AccessFlags.Read);
 
                     //Declare that the pass uses the input texture
                     var colorTexture = source;
                     //For avoid overpainting
                     if (renderPassEvent >= (RenderPassEvent)InjectionPoint.BeforeRenderingTransparents)
-                    {
                         colorTexture = resourcesData.cameraOpaqueTexture;
-                    }
+
                     if ((input & ScriptableRenderPassInput.Color) != ScriptableRenderPassInput.None)
                     {
                         Debug.Assert(colorTexture.IsValid());
@@ -233,22 +205,22 @@ namespace Meryuhi.Rendering
                         Debug.Assert(resourcesData.cameraDepthTexture.IsValid());
                         builder.UseTexture(resourcesData.cameraDepthTexture);
                     }
-                    
+
                     builder.SetRenderAttachment(destination, 0, AccessFlags.Write);
 
                     builder.SetRenderFunc(static (MainPassData data, RasterGraphContext rgContext) =>
                     {
                         ExecuteMainPass(rgContext.cmd, data.InputTexture, data.Material, data.Fog);
-                    });                
+                    });
                 }
             }
 
-            private class CopyPassData
+            class CopyPassData
             {
                 internal TextureHandle InputTexture;
             }
 
-            private class MainPassData
+            class MainPassData
             {
                 internal Material Material;
                 internal FullScreenFog Fog;
@@ -270,23 +242,21 @@ namespace Meryuhi.Rendering
         /// <summary>
         /// Selection for when the effect is rendered.
         /// </summary>
-        [SerializeField]
-        private InjectionPoint _injectionPoint = InjectionPoint.BeforeRenderingPostProcessing;
+        [SerializeField] InjectionPoint _injectionPoint = InjectionPoint.BeforeRenderingPostProcessing;
         /// <summary>
         /// Selection for which camera type want to render.
         /// </summary>
-        [SerializeField]
-        private CameraType _renderCamera = CameraType.Game | CameraType.SceneView;
+        [SerializeField] CameraType _renderCamera = CameraType.Game | CameraType.SceneView;
         /// <summary>
         /// Material the Renderer Feature uses to render the effect.
         /// </summary>
-        [SerializeField]
         [Reload("Shaders/FullScreenFog.shadergraph")]
-        private Shader _shader;
+        [SerializeField] Shader _shader;
 
-        private Material _material;
-        private FullScreenFogRenderPass _renderPass;
+        Material _material;
+        FullScreenFogRenderPass _renderPass;
         public static readonly string PackagePath = "Packages/moe.meryuhi.effects.fog";
+
         /// <inheritdoc/>
         public override void Create()
         {
@@ -295,7 +265,8 @@ namespace Meryuhi.Rendering
 #endif
             if (_shader == null)
             {
-                Debug.LogWarning($"Missing {FullScreenFog.Name} shader. {GetType().Name} will not execute. Check for missing reference in the assigned renderer.");
+                Debug.LogWarning(
+                    $"Missing {FullScreenFog.Name} shader. {GetType().Name} will not execute. Check for missing reference in the assigned renderer.");
                 return;
             }
             _material = CoreUtils.CreateEngineMaterial(_shader);
@@ -305,36 +276,26 @@ namespace Meryuhi.Rendering
         /// <inheritdoc/>
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
-            if ((renderingData.cameraData.cameraType & _renderCamera) == 0)
-            {
-                return;
-            }
+            if ((renderingData.cameraData.cameraType & _renderCamera) == 0) return;
 
 #if UNITY_EDITOR
             var sceneView = UnityEditor.SceneView.currentDrawingSceneView;
-            if (sceneView != null && renderingData.cameraData.camera == sceneView.camera && !sceneView.sceneViewState.fogEnabled)
-            {
-                return;
-            }
+            if (sceneView != null && renderingData.cameraData.camera == sceneView.camera && !sceneView.sceneViewState.fogEnabled) return;
+
 #endif
             var stack = VolumeManager.instance.stack;
             var fog = stack?.GetComponent<FullScreenFog>();
-            if (fog == null || !fog.IsActive())
-            {
-                return;
-            }
+            if (fog == null || !fog.IsActive()) return;
 
-            if (_material == null)
-            {
-                return;
-            }
+            if (_material == null) return;
+
             _renderPass.renderPassEvent = (RenderPassEvent)_injectionPoint;
             _renderPass?.Setup(new PassData
             {
                 Material = _material,
                 Fog = fog,
             });
-            
+
             _renderPass.ConfigureInput(ScriptableRenderPassInput.Color | ScriptableRenderPassInput.Depth);
 
             _renderPass.requiresIntermediateTexture = true;

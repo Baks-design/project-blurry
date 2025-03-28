@@ -1,7 +1,6 @@
 ﻿using System;
-using Assets.Scripts.Runtime.Systems.Inventory.Helpers;
 
-namespace Assets.Scripts.Runtime.Systems.Inventory.Extensions
+namespace Assets.Scripts.Runtime.Utilities.Helpers
 {
     public static class GuidExtensions
     {

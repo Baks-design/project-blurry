@@ -1,8 +1,7 @@
 ﻿using System;
-using Assets.Scripts.Runtime.Systems.Inventory.Extensions;
 using UnityEngine;
 
-namespace Assets.Scripts.Runtime.Systems.Inventory.Helpers
+namespace Assets.Scripts.Runtime.Utilities.Helpers
 {
     /// <summary>
     /// Represents a globally unique identifier (GUID) that is serializable with Unity and usable in game scripts.

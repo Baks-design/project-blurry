@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Assets.Scripts.Runtime.Systems.Inventory;
 using Assets.Scripts.Runtime.Systems.Persistence.Bindings;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -28,7 +27,7 @@ namespace Assets.Scripts.Runtime.Systems.Persistence
             if (scene.name == "Menu") return;
 
             Bind<PlayerPersistence, PlayerData>(gameData.playerData);
-            Bind<InventoryHandler, InventoryData>(gameData.inventoryData);
+            //Bind<InventoryHandler, InventoryData>(gameData.inventoryData);
         }
 
         void Bind<T, TData>(TData data) where T : MonoBehaviour, IBind<TData> where TData : ISaveable, new()
